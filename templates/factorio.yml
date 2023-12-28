@@ -1,0 +1,23 @@
+port: 34197
+factorio_version: latest
+
+info:
+  name: Factorio
+  container: alpine:latest
+  user: factorio
+  working_dir: factorio
+
+actions:
+  adduser: |
+    adduser -H -D factorio factorio
+    chown -R factorio:factorio .
+
+  install: |
+    wget --output-document=factorio.tar.xz https://www.factorio.com/get-download/latest/headless/linux64
+    tar --no-same-owner -xvf factorio.tar.xz
+    rm -f factorio.tar.xz
+    cd factorio
+    mkdir saves
+    mkdir mods
+  start: ./bin/x64/factorio --port ${port}
+  stop: /quit

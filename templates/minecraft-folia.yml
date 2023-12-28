@@ -1,0 +1,34 @@
+port: 25565
+max_memory: 2048
+minecraft_version: 1.20.2
+user_jvm_args: ""
+
+info:
+  name: Minecraft Folia
+  container: amazoncorretto:21-alpine
+  user: folia
+  working_dir: folia
+
+actions:
+  adduser: |
+    adduser -H -D folia folia
+    chown -R folia:folia .
+
+  install: |
+    apk add jq
+    
+    build_version=$(wget -qO - https://api.papermc.io/v2/projects/folia/versions/${minecraft_version}/builds/ | jq -r ".builds[-1].build")
+    wget --output-document=folia.jar https://api.papermc.io/v2/projects/folia/versions/${minecraft_version}/builds/${build_version}/downloads/folia-${minecraft_version}-${build_version}.jar
+    
+    touch eula.txt
+    echo "eula=true" > eula.txt
+    touch server.properties
+    echo "server-port=${port}\nquery.port=${port}" > server.properties
+    mkdir plugins
+
+  start: java -Xmx${max_memory}M &{user_jvm_args} -Dterminal.jline=false -Dterminal.ansi=true -Djline.terminal=jline.UnsupportedTerminal -Dlog4j2.formatMsgNoLookups=true -jar folia.jar nogui
+  stop: stop
+  backup:
+    directory: .
+    start: save-off
+    finish: save-on

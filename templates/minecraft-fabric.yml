@@ -1,0 +1,35 @@
+port: 25565
+max_memory: 2048
+minecraft_version: 1.20.4
+user_jvm_args: ""
+
+info:
+  name: Minecraft Fabric
+  container: amazoncorretto:21-alpine
+  user: fabric
+  working_dir: fabric
+
+actions:
+  adduser: |
+    adduser -H -D fabric fabric
+    chown -R fabric:fabric .
+
+  install: |
+    apk add jq
+    
+    wget --output-document=fabric-installer.jar $(wget -qO - https://meta.fabricmc.net/v2/versions/installer | jq -r ".[0].url")
+    java -Xmx${max_memory}M -jar fabric-installer.jar server -downloadMinecraft -mcversion ${minecraft_version}
+    rm -f fabric-installer.jar
+    
+    touch eula.txt
+    echo "eula=true" > eula.txt
+    touch server.properties
+    echo "server-port=${port}\nquery.port=${port}" > server.properties
+    mkdir mods
+
+  start: java -Xmx${max_memory}M &{user_jvm_args} -Dterminal.jline=false -Dterminal.ansi=true -Dlog4j2.formatMsgNoLookups=true -jar fabric-server-launch.jar nogui
+  stop: stop
+  backup:
+    directory: .
+    start: save-off
+    finish: save-on

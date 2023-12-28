@@ -1,0 +1,33 @@
+port: 25565
+max_memory: 2048
+forge_version: 1.20.4-49.0.12
+user_jvm_args: ""
+
+info:
+  name: Minecraft Forge
+  container: amazoncorretto:21-alpine
+  user: forge
+  working_dir: forge
+
+actions:
+  adduser: |
+    adduser -H -D forge forge
+    chown -R forge:forge .
+
+  install: |
+    wget --output-document=forge-installer.jar https://maven.minecraftforge.net/net/minecraftforge/forge/${forge_version}/forge-${forge_version}-installer.jar
+    java -Xmx${max_memory}M -jar forge-installer.jar --installServer
+    rm -f forge-installer.jar
+    
+    touch eula.txt
+    echo "eula=true" > eula.txt
+    touch server.properties
+    echo "server-port=${port}\nquery.port=${port}" > server.properties
+    mkdir mods
+
+  start: java -Xmx${max_memory}M &{user_jvm_args} -Dterminal.jline=false -Dterminal.ansi=true -Dlog4j2.formatMsgNoLookups=true @libraries/net/minecraftforge/forge/${forge_version}/unix_args.txt nogui || java -Xmx${max_memory}M &{user_jvm_args} -Dlog4j2.formatMsgNoLookups=true -jar forge-${forge_version}-shim.jar
+  stop: stop
+  backup:
+    directory: .
+    start: save-off
+    finish: save-on

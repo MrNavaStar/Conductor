@@ -1,0 +1,20 @@
+port: 6567
+max_memory: 2048
+mindustry_version: 146
+map_name: Wasteland
+display_name: Mindustry Server
+
+info:
+  name: Mindustry
+  container: amazoncorretto:21-alpine
+  user: mindustry
+  working_dir: mindustry
+
+actions:
+  adduser: |
+    adduser -H -D mindustry mindustry
+    chown -R mindustry:mindustry .
+
+  install: wget --output-document=server-release.jar https://github.com/Anuken/Mindustry/releases/download/v${mindustry_version}/server-release.jar
+  start: java -Xmx${max_memory}M -jar server-release.jar config port ${port}, config name ${display_name}, host ${map_name}
+  stop: exit

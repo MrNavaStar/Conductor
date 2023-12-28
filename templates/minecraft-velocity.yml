@@ -1,0 +1,25 @@
+port: 25577
+max_memory: 2048
+velocity_version: 3.3.0-SNAPSHOT
+user_jvm_args: ""
+
+info:
+  name: Minecraft Velocity
+  container: amazoncorretto:21-alpine
+  user: velocity
+  working_dir: velocity
+
+actions:
+  adduser: |
+    adduser -H -D velocity velocity
+    chown -R velocity:velocity .
+
+  install: |
+    apk add jq
+    
+    build_version=$(wget -qO - https://api.papermc.io/v2/projects/velocity/versions/${velocity_version}/builds/ | jq -r '.builds[-1].build')
+    wget --output-document=velocity.jar https://api.papermc.io/v2/projects/velocity/versions/${velocity_version}/builds/${build_version}/downloads/velocity-${velocity_version}-${build_version}.jar
+    mkdir plugins
+
+  start: java -Xmx${max_memory}M &{user_jvm_args} -Dterminal.jline=false -Dterminal.ansi=true -Dlog4j2.formatMsgNoLookups=true -jar velocity.jar
+  stop: stop
