@@ -17,11 +17,11 @@ actions:
   install: |
     apk add jq
     
-    build_version=$(wget -qO - https://api.papermc.io/v2/projects/paper/versions/${minecraft_version}/builds/ | jq -r '.builds[-1].build')
+    build_version=$(wget -qO - https://api.papermc.io/v2/projects/paper/versions/${minecraft_version}/builds/ | jq -r ".builds[-1].build")
     wget --output-document=paper.jar https://api.papermc.io/v2/projects/paper/versions/${minecraft_version}/builds/${build_version}/downloads/paper-${minecraft_version}-${build_version}.jar
     
     touch eula.txt
-    echo 'eula=true' > eula.txt
+    echo "eula=true" > eula.txt
     touch server.properties
     echo "server-port=${port}\nquery.port=${port}" > server.properties
     mkdir plugins

@@ -1,6 +1,7 @@
 port: 25565
 max_memory: 2048
-forge_version: 1.20.4-49.0.12
+minecraft_version: 1.20.4
+forge_version: latest
 user_jvm_args: ""
 
 info:
@@ -15,7 +16,14 @@ actions:
     chown -R forge:forge .
 
   install: |
-    wget --output-document=forge-installer.jar https://maven.minecraftforge.net/net/minecraftforge/forge/${forge_version}/forge-${forge_version}-installer.jar
+    apk add jq
+    
+    if [ forge_version -eq "latest" ]
+    then
+      forge_version=$(wget -q0 - https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json | jq -r '.promos"${minecraft_version}-${forge_version}"')
+    fi
+    
+    wget --output-document=forge-installer.jar https://maven.minecraftforge.net/net/minecraftforge/forge/${minecraft_version}-${forge_version}/forge-${minecraft_version}-${forge_version}-installer.jar
     java -Xmx${max_memory}M -jar forge-installer.jar --installServer
     rm -f forge-installer.jar
     

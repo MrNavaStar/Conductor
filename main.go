@@ -7,6 +7,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
+	"github.com/pterm/pterm"
 	urfave "github.com/urfave/cli/v2"
 	"io"
 	"log"
@@ -35,9 +36,9 @@ func deployContainer(ctx context.Context, cli *client.Client, template Template,
 
 	var installCmd = parseTemplateVars(templateVars) +
 		"mkdir " + template.Info.WorkingDir +
-		" && cd " + template.Info.WorkingDir +
-		" && " + parseScript(template.Actions.Install) +
-		" && " + parseScript(template.Actions.Adduser)
+		"\ncd " + template.Info.WorkingDir +
+		"\n" + template.Actions.Install +
+		"\n" + template.Actions.Adduser
 
 	println(installCmd)
 
@@ -74,41 +75,105 @@ func runCommandInContainer(ctx context.Context, cli *client.Client, containerId 
 	return nil
 }
 
-func main() {
-	/*ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		log.Fatal(err)
+func cliGetTemplateVars(c *urfave.Context) urfave.ExitCoder {
+	templateName := c.Args().Get(0)
+	if len(templateName) == 0 {
+		return nil
 	}
-	defer cli.Close()
-
-	var templateStr = "templates/mindustry.yml"
-
-	template, err := parseTemplate(templateStr)
+	vars, err := getTemplateVars(templateName)
 	if err != nil {
-		log.Fatal(err)
+		return urfave.Exit(err.Error(), 1)
 	}
 
-	templateVars, err := getTemplateVars(templateStr)
-	if err != nil {
-		log.Fatal(err)
+	for key := range vars {
+		pterm.NewRGB(252, 140, 3).Print(key)
+		pterm.NewRGB(255, 255, 255).Print(":")
+		pterm.NewRGB(3, 252, 90).Println(vars[key])
+	}
+	return nil
+}
+
+func cliDeployServer(c *urfave.Context) urfave.ExitCoder {
+	/*templateName := c.Args().Get(0)
+	if len(templateName) == 0 {
+		return nil
 	}
 
-	fmt.Println(template)
-
-	err = deployContainer(ctx, cli, template, "stupid", templateVars)
+	ctx := context.Background()
+	docker, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
-		log.Fatal(err)
+		return urfave.Exit(err.Error(), 1)
+	}
+	defer docker.Close()
+
+	template, err := parseTemplate(templateName)
+	if err != nil {
+		return urfave.Exit(err.Error(), 1)
+	}
+
+	templateVars, err := getTemplateVars(templateName)
+	if err != nil {
+		return urfave.Exit(err.Error(), 1)
+	}
+
+	err := os.MkdirAll("/var/lib/conductor", os.ModePerm)
+	if err != nil {
+		return nil
+	}
+
+	create, err := docker.VolumeCreate(ctx, volume.CreateOptions{})
+	if err != nil {
+		return nil
 	}*/
 
+	return nil
+}
+
+func cliStartServer(c *urfave.Context) urfave.ExitCoder {
+
+	return nil
+}
+
+func main() {
 	app := &urfave.App{
-		Name:        "Conductor",
+		Name:        "conductor",
 		Description: "Easily create and manage game servers in a dockerized environment",
 		Usage:       "conductor [template name]",
 		Action: func(c *urfave.Context) error {
 			return cliGetTemplateVars(c)
 		},
-		Commands: []*urfave.Command{},
+		Commands: []*urfave.Command{
+			{
+				Name:        "deploy",
+				Description: "Deploy a new server",
+				Usage:       "conductor deploy [template name] [flags]",
+				Action: func(c *urfave.Context) error {
+					return cliDeployServer(c)
+				},
+			},
+			{
+				Name:    "delete",
+				Aliases: []string{"del", "remove", "rm"},
+			},
+			{
+				Name:        "set",
+				Description: "Set a servers global variables",
+				Usage:       "conductor set [flags]",
+			},
+			{
+				Name:    "start",
+				Aliases: []string{"begin"},
+				Usage:   "conductor start [server name]",
+				Action: func(c *urfave.Context) error {
+					return cliStartServer(c)
+				},
+			},
+			{
+				Name:    "stop",
+				Aliases: []string{"halt", "quit", "kill"},
+				Usage:   "conductor stop [server name]",
+			},
+		},
 	}
 	err := app.Run(os.Args)
 	if err != nil {

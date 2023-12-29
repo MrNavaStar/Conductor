@@ -1,6 +1,9 @@
 package main
 
-import "strconv"
+import (
+	"os"
+	"strconv"
+)
 
 func mapToStringMap(currentMap map[string]interface{}) map[string]string {
 	newMap := map[string]string{}
@@ -15,4 +18,12 @@ func mapToStringMap(currentMap map[string]interface{}) map[string]string {
 		}
 	}
 	return newMap
+}
+
+func getCacheDir() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return home + "/.cache/conductor", nil
 }

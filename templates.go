@@ -1,11 +1,10 @@
 package main
 
 import (
-	"github.com/pterm/pterm"
-	urfave "github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v3"
+	"io"
+	"net/http"
 	"os"
-	"regexp"
 	"strings"
 )
 
@@ -28,10 +27,54 @@ type Template struct {
 	Actions TemplateActions
 }
 
-func parseTemplate(filename string) (Template, error) {
+func parseTemplateName(templateName string) string {
+	if !strings.HasSuffix(templateName, ".yml") {
+		return templateName + ".yml"
+	}
+	return templateName
+}
+
+func getTemplateRaw(templateName string) ([]byte, error) {
+	templateName = parseTemplateName(templateName)
+	cacheDir, err := getCacheDir()
+	if err != nil {
+		return nil, err
+	}
+
+	err = os.MkdirAll(cacheDir+"/templates", os.ModePerm)
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := os.ReadFile(cacheDir + "/templates/" + templateName)
+	if err != nil {
+		resp, err := http.Get("https://raw.githubusercontent.com/MrNavaStar/Conductor/master/templates/" + templateName)
+		if err != nil {
+			return nil, err
+		}
+
+		data, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		file, err := os.Create(cacheDir + "/templates/" + templateName)
+		if err != nil {
+			return nil, err
+		}
+		_, err = file.Write(data)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return data, nil
+}
+
+func parseTemplate(templateName string) (Template, error) {
 	var template Template
 
-	data, err := os.ReadFile(filename)
+	templateName = parseTemplateName(templateName)
+	data, err := getTemplateRaw(templateName)
 	if err != nil {
 		return template, err
 	}
@@ -42,10 +85,10 @@ func parseTemplate(filename string) (Template, error) {
 	return template, nil
 }
 
-func getTemplateVars(filename string) (map[string]string, error) {
+func getTemplateVars(templateName string) (map[string]string, error) {
 	templateMap := make(map[string]interface{})
 
-	data, err := os.ReadFile(filename)
+	data, err := getTemplateRaw(templateName)
 	if err != nil {
 		return mapToStringMap(templateMap), err
 	}
@@ -70,32 +113,8 @@ func parseTemplateVars(templateVars map[string]string) string {
 	return cmd
 }
 
-func parseScript(templateCmd string) string {
+/*func parseScript(templateCmd string) string {
 	re := regexp.MustCompile(`(\s+\n|\n+)`)
 	var cmd, _ = strings.CutSuffix(re.ReplaceAllString(templateCmd, " && "), " && ")
 	return cmd
-}
-
-func cliGetTemplateVars(c *urfave.Context) urfave.ExitCoder {
-	templateName := c.Args().Get(0)
-
-	if len(templateName) == 0 {
-		return nil
-	}
-
-	if !strings.HasSuffix(templateName, ".yml") {
-		templateName = templateName + ".yml"
-	}
-
-	vars, err := getTemplateVars("templates/" + templateName)
-	if err != nil {
-		return urfave.Exit(err.Error(), 1)
-	}
-
-	for key := range vars {
-		pterm.NewRGB(252, 140, 3).Print(key)
-		pterm.NewRGB(255, 255, 255).Print(":")
-		pterm.NewRGB(3, 252, 90).Println(vars[key])
-	}
-	return nil
-}
+}*/
