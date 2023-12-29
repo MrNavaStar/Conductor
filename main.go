@@ -12,6 +12,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 )
 
 func deployContainer(ctx context.Context, cli *client.Client, template Template, name string, templateVars map[string]string) error {
@@ -86,9 +87,22 @@ func cliGetTemplateVars(c *urfave.Context) urfave.ExitCoder {
 	}
 
 	for key := range vars {
-		pterm.NewRGB(252, 140, 3).Print(key)
+		pterm.NewRGB(66, 135, 245).Print(key)
 		pterm.NewRGB(255, 255, 255).Print(":")
 		pterm.NewRGB(3, 252, 90).Println(vars[key])
+	}
+	return nil
+}
+
+func cliGetTemplateNames(c *urfave.Context) urfave.ExitCoder {
+	names, err := getTemplateNames()
+	if err != nil {
+		return urfave.Exit(err.Error(), 1)
+	}
+
+	for i := range names {
+		name, _ := strings.CutSuffix(names[i], ".yml")
+		pterm.NewRGB(66, 135, 245).Println(name)
 	}
 	return nil
 }
@@ -143,6 +157,14 @@ func main() {
 			return cliGetTemplateVars(c)
 		},
 		Commands: []*urfave.Command{
+			{
+				Name:        "templates",
+				Description: "List the built in templates",
+				Usage:       "conductor templates",
+				Action: func(c *urfave.Context) error {
+					return cliGetTemplateNames(c)
+				},
+			},
 			{
 				Name:        "deploy",
 				Description: "Deploy a new server",

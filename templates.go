@@ -2,8 +2,6 @@ package main
 
 import (
 	"gopkg.in/yaml.v3"
-	"io"
-	"net/http"
 	"os"
 	"strings"
 )
@@ -34,6 +32,32 @@ func parseTemplateName(templateName string) string {
 	return templateName
 }
 
+func getTemplateNames() ([]string, error) {
+	repoTree, err := getGithubRepoTree("https://api.github.com/repos/mrnavastar/conductor/git/trees/master?recursive=1")
+	if err != nil {
+		return nil, err
+	}
+
+	var url string
+	for i := range repoTree.Tree {
+		if repoTree.Tree[i].Path == "templates" {
+			url = repoTree.Tree[i].Url
+			break
+		}
+	}
+
+	repoTree, err = getGithubRepoTree(url)
+	if err != nil {
+		return nil, err
+	}
+
+	var names []string
+	for i := range repoTree.Tree {
+		names = append(names, repoTree.Tree[i].Path)
+	}
+	return names, nil
+}
+
 func getTemplateRaw(templateName string) ([]byte, error) {
 	templateName = parseTemplateName(templateName)
 	cacheDir, err := getCacheDir()
@@ -48,24 +72,7 @@ func getTemplateRaw(templateName string) ([]byte, error) {
 
 	data, err := os.ReadFile(cacheDir + "/templates/" + templateName)
 	if err != nil {
-		resp, err := http.Get("https://raw.githubusercontent.com/MrNavaStar/Conductor/master/templates/" + templateName)
-		if err != nil {
-			return nil, err
-		}
-
-		data, err = io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-
-		file, err := os.Create(cacheDir + "/templates/" + templateName)
-		if err != nil {
-			return nil, err
-		}
-		_, err = file.Write(data)
-		if err != nil {
-			return nil, err
-		}
+		data, err = downloadFile("https://raw.githubusercontent.com/MrNavaStar/Conductor/master/templates/"+templateName, cacheDir+"/templates/"+templateName)
 	}
 	return data, nil
 }
