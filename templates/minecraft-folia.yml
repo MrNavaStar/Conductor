@@ -23,7 +23,7 @@ actions:
     touch eula.txt
     echo "eula=true" > eula.txt
     touch server.properties
-    echo "server-port=${port}\nquery.port=${port}" > server.properties
+    echo -e "server-port=${port}\nquery.port=${port}" > server.properties
     mkdir plugins
 
   start: java -Xmx${max_memory}M &{user_jvm_args} -Dterminal.jline=false -Dterminal.ansi=true -Djline.terminal=jline.UnsupportedTerminal -Dlog4j2.formatMsgNoLookups=true -jar folia.jar nogui
