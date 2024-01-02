@@ -15,6 +15,6 @@ actions:
     adduser -H -D mindustry mindustry
     chown -R mindustry:mindustry .
 
-  install: wget --output-document=server-release.jar https://github.com/Anuken/Mindustry/releases/download/v${mindustry_version}/server-release.jar
+  update: wget --output-document=server-release.jar https://github.com/Anuken/Mindustry/releases/download/v${mindustry_version}/server-release.jar
   start: java -Xmx${max_memory}M -jar server-release.jar config port ${port}, config name ${display_name}, host ${map_name}
   stop: exit

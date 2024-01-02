@@ -16,19 +16,17 @@ actions:
 
   install: |
     apk add jq
-    
+    echo "eula=true" > eula.txt
+    echo -e "server-port=${port}\nquery.port=${port}" > server.properties
+    mkdir plugins
+
+  update: |
     if [ "${minecraft_version}" == "latest" ]; then
       minecraft_version=$(wget -qO - https://api.papermc.io/v2/projects/folia/ | jq -r ".versions[-1]")
     fi
     
     build_version=$(wget -qO - https://api.papermc.io/v2/projects/folia/versions/${minecraft_version}/builds/ | jq -r ".builds[-1].build")
     wget --output-document=folia.jar https://api.papermc.io/v2/projects/folia/versions/${minecraft_version}/builds/${build_version}/downloads/folia-${minecraft_version}-${build_version}.jar
-    
-    touch eula.txt
-    echo "eula=true" > eula.txt
-    touch server.properties
-    echo -e "server-port=${port}\nquery.port=${port}" > server.properties
-    mkdir plugins
 
   start: java -Xmx${max_memory}M &{user_jvm_args} -Dterminal.jline=false -Dterminal.ansi=true -Djline.terminal=jline.UnsupportedTerminal -Dlog4j2.formatMsgNoLookups=true -jar folia.jar nogui
   stop: stop

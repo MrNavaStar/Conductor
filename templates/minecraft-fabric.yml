@@ -16,7 +16,11 @@ actions:
 
   install: |
     apk add jq
-    
+    echo "eula=true" > eula.txt
+    echo -e "server-port=${port}\nquery.port=${port}" > server.properties
+    mkdir mods
+
+  update: |
     wget --output-document=fabric-installer.jar $(wget -qO - https://meta.fabricmc.net/v2/versions/installer | jq -r ".[0].url")
     if [ "${minecraft_version}" == "latest" ]; then
       java -Xmx${max_memory}M -jar fabric-installer.jar server -downloadMinecraft
@@ -25,11 +29,6 @@ actions:
     fi
     
     rm -f fabric-installer.jar
-    touch eula.txt
-    echo "eula=true" > eula.txt
-    touch server.properties
-    echo -e "server-port=${port}\nquery.port=${port}" > server.properties
-    mkdir mods
 
   start: java -Xmx${max_memory}M &{user_jvm_args} -Dterminal.jline=false -Dterminal.ansi=true -Dlog4j2.formatMsgNoLookups=true -jar fabric-server-launch.jar nogui
   stop: stop

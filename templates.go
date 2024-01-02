@@ -16,6 +16,7 @@ type TemplateInfo struct {
 type TemplateActions struct {
 	Adduser string
 	Install string
+	Update  string
 	Start   string
 	Stop    string
 }

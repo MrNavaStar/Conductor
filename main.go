@@ -44,6 +44,7 @@ func deployContainer(ctx context.Context, cli *client.Client, template Template,
 		"mkdir " + template.Info.WorkingDir +
 		"\ncd " + template.Info.WorkingDir +
 		"\n" + template.Actions.Install +
+		"\n" + template.Actions.Update +
 		"\n" + template.Actions.Adduser +
 		"\n" + saveTemplateVarsCmd(templateVars)
 
