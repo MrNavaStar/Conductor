@@ -1,6 +1,6 @@
 port: 25565
 max_memory: 2048
-minecraft_version: 1.20.4
+minecraft_version: latest
 user_jvm_args: ""
 
 info:
@@ -16,6 +16,10 @@ actions:
 
   install: |
     apk add jq
+    
+    if [ "${minecraft_version}" == "latest" ]; then
+      minecraft_version=$(wget -qO - https://api.papermc.io/v2/projects/paper/ | jq -r ".versions[-1]")
+    fi
     
     build_version=$(wget -qO - https://api.papermc.io/v2/projects/paper/versions/${minecraft_version}/builds/ | jq -r ".builds[-1].build")
     wget --output-document=paper.jar https://api.papermc.io/v2/projects/paper/versions/${minecraft_version}/builds/${build_version}/downloads/paper-${minecraft_version}-${build_version}.jar

@@ -1,6 +1,6 @@
 port: 25565
 max_memory: 2048
-minecraft_version: 1.20.4
+minecraft_version: latest
 forge_version: latest
 user_jvm_args: ""
 
@@ -18,9 +18,12 @@ actions:
   install: |
     apk add jq
     
-    if [ forge_version -eq "latest" ]
-    then
-      forge_version=$(wget -q0 - https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json | jq -r '.promos"${minecraft_version}-${forge_version}"')
+    if [ "${minecraft_version}" == "latest" ]; then
+      minecraft_version=$(wget -qO - https://piston-meta.mojang.com/mc/game/version_manifest_v2.json | jq -r ".latest.release")
+    fi
+    
+    if [ "${forge_version}" == "latest" ]; then
+      forge_version=$(wget -qO - https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json | jq -r --arg mc "${minecraft_version}" '.promos."\($mc)-latest"')
     fi
     
     wget --output-document=forge-installer.jar https://maven.minecraftforge.net/net/minecraftforge/forge/${minecraft_version}-${forge_version}/forge-${minecraft_version}-${forge_version}-installer.jar

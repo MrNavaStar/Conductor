@@ -1,6 +1,6 @@
 port: 25577
 max_memory: 2048
-velocity_version: 3.3.0-SNAPSHOT
+velocity_version: latest
 user_jvm_args: ""
 
 info:
@@ -16,6 +16,10 @@ actions:
 
   install: |
     apk add jq
+    
+    if [ "${velocity_version}" == "latest" ]; then
+      velocity_version=$(wget -qO - https://api.papermc.io/v2/projects/velocity/ | jq -r ".versions[-1]")
+    fi
     
     build_version=$(wget -qO - https://api.papermc.io/v2/projects/velocity/versions/${velocity_version}/builds/ | jq -r '.builds[-1].build')
     wget --output-document=velocity.jar https://api.papermc.io/v2/projects/velocity/versions/${velocity_version}/builds/${build_version}/downloads/velocity-${velocity_version}-${build_version}.jar

@@ -120,8 +120,10 @@ func parseTemplateVars(templateVars map[string]string) string {
 	return cmd
 }
 
-/*func parseScript(templateCmd string) string {
-	re := regexp.MustCompile(`(\s+\n|\n+)`)
-	var cmd, _ = strings.CutSuffix(re.ReplaceAllString(templateCmd, " && "), " && ")
-	return cmd
-}*/
+func saveTemplateVarsCmd(templateVars map[string]string) string {
+	var cmd = "echo -e \"# This file is auto generated, DO NOT MODIFY!!!\n# Modifying incorrectly may break this server.\n"
+	for key := range templateVars {
+		cmd += key + "=${" + key + "}\n"
+	}
+	return cmd + "\" > .conductor.properties"
+}

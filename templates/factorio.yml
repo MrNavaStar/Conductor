@@ -13,6 +13,8 @@ actions:
     chown -R factorio:factorio .
 
   install: |
+    cd ..
+    
     wget --output-document=factorio.tar.xz https://www.factorio.com/get-download/latest/headless/linux64
     tar --no-same-owner -xvf factorio.tar.xz
     rm -f factorio.tar.xz

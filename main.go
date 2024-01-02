@@ -16,7 +16,7 @@ import (
 )
 
 func deployContainer(ctx context.Context, cli *client.Client, template Template, name string, templateVars map[string]string) error {
-	out, err := cli.ImagePull(ctx, "docker.io/library/"+template.Info.Container, types.ImagePullOptions{})
+	out, err := cli.ImagePull(ctx, template.Info.Container, types.ImagePullOptions{})
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,8 @@ func deployContainer(ctx context.Context, cli *client.Client, template Template,
 		"mkdir " + template.Info.WorkingDir +
 		"\ncd " + template.Info.WorkingDir +
 		"\n" + template.Actions.Install +
-		"\n" + template.Actions.Adduser
+		"\n" + template.Actions.Adduser +
+		"\n" + saveTemplateVarsCmd(templateVars)
 
 	err = runCommandInContainer(ctx, cli, createdContainer.ID, "root", installCmd)
 	if err != nil {
