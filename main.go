@@ -18,21 +18,26 @@ import (
 func deployContainer(ctx context.Context, cli *client.Client, template Template, name string, templateVars map[string]string) error {
 	out, err := cli.ImagePull(ctx, "docker.io/library/"+template.Info.Container, types.ImagePullOptions{})
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer out.Close()
 	io.Copy(os.Stdout, out)
+
+	/*	volume, err := cli.VolumeCreate(ctx, volume.CreateOptions{})
+		if err != nil {
+			return nil
+		}*/
 
 	createdContainer, err := cli.ContainerCreate(ctx, &container.Config{
 		Image: template.Info.Container,
 		Tty:   true,
 	}, nil, nil, nil, name)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	if err := cli.ContainerStart(ctx, createdContainer.ID, types.ContainerStartOptions{}); err != nil {
-		panic(err)
+		return err
 	}
 
 	var installCmd = parseTemplateVars(templateVars) +
@@ -40,8 +45,6 @@ func deployContainer(ctx context.Context, cli *client.Client, template Template,
 		"\ncd " + template.Info.WorkingDir +
 		"\n" + template.Actions.Install +
 		"\n" + template.Actions.Adduser
-
-	println(installCmd)
 
 	err = runCommandInContainer(ctx, cli, createdContainer.ID, "root", installCmd)
 	if err != nil {
@@ -53,8 +56,11 @@ func deployContainer(ctx context.Context, cli *client.Client, template Template,
 
 func runCommandInContainer(ctx context.Context, cli *client.Client, containerId string, user string, cmd string) error {
 	exec, err := cli.ContainerExecCreate(ctx, containerId, types.ExecConfig{
-		User: user,
-		Cmd:  []string{"sh", "-c", cmd},
+		User:         user,
+		Cmd:          []string{"sh", "-c", cmd},
+		Tty:          false,
+		AttachStdout: true,
+		AttachStderr: true,
 	})
 	if err != nil {
 		return err
@@ -108,7 +114,7 @@ func cliGetTemplateNames(c *urfave.Context) urfave.ExitCoder {
 }
 
 func cliDeployServer(c *urfave.Context) urfave.ExitCoder {
-	/*templateName := c.Args().Get(0)
+	templateName := c.Args().Get(0)
 	if len(templateName) == 0 {
 		return nil
 	}
@@ -130,15 +136,15 @@ func cliDeployServer(c *urfave.Context) urfave.ExitCoder {
 		return urfave.Exit(err.Error(), 1)
 	}
 
-	err := os.MkdirAll("/var/lib/conductor", os.ModePerm)
-	if err != nil {
-		return nil
-	}
-
-	create, err := docker.VolumeCreate(ctx, volume.CreateOptions{})
+	/*err := os.MkdirAll("/var/lib/conductor", os.ModePerm)
 	if err != nil {
 		return nil
 	}*/
+
+	err = deployContainer(ctx, docker, template, "pain", templateVars)
+	if err != nil {
+		return urfave.Exit(err.Error(), 1)
+	}
 
 	return nil
 }
