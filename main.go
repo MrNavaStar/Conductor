@@ -1,88 +1,12 @@
 package main
 
 import (
-	"bufio"
-	"context"
-	"fmt"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
 	"github.com/pterm/pterm"
 	urfave "github.com/urfave/cli/v2"
-	"io"
 	"log"
 	"os"
 	"strings"
 )
-
-func deployContainer(ctx context.Context, cli *client.Client, template Template, name string, templateVars map[string]string) error {
-	out, err := cli.ImagePull(ctx, template.Info.Container, types.ImagePullOptions{})
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-	io.Copy(os.Stdout, out)
-
-	/*	volume, err := cli.VolumeCreate(ctx, volume.CreateOptions{})
-		if err != nil {
-			return nil
-		}*/
-
-	createdContainer, err := cli.ContainerCreate(ctx, &container.Config{
-		Image: template.Info.Container,
-		Tty:   true,
-	}, nil, nil, nil, name)
-	if err != nil {
-		return err
-	}
-
-	if err := cli.ContainerStart(ctx, createdContainer.ID, types.ContainerStartOptions{}); err != nil {
-		return err
-	}
-
-	var installCmd = parseTemplateVars(templateVars) +
-		"mkdir " + template.Info.WorkingDir +
-		"\ncd " + template.Info.WorkingDir +
-		"\n" + template.Actions.Install +
-		"\n" + template.Actions.Update +
-		"\n" + template.Actions.Adduser +
-		"\n" + saveTemplateVarsCmd(templateVars)
-
-	err = runCommandInContainer(ctx, cli, createdContainer.ID, "root", installCmd)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func runCommandInContainer(ctx context.Context, cli *client.Client, containerId string, user string, cmd string) error {
-	exec, err := cli.ContainerExecCreate(ctx, containerId, types.ExecConfig{
-		User:         user,
-		Cmd:          []string{"sh", "-c", cmd},
-		Tty:          false,
-		AttachStdout: true,
-		AttachStderr: true,
-	})
-	if err != nil {
-		return err
-	}
-
-	resp, err := cli.ContainerExecAttach(context.Background(), exec.ID, types.ExecStartCheck{
-		Tty: true,
-	})
-	if err != nil {
-		return err
-	}
-	defer resp.Close()
-
-	scanner := bufio.NewScanner(resp.Reader)
-	for scanner.Scan() {
-		fmt.Println(scanner.Text())
-	}
-
-	return nil
-}
 
 func cliGetTemplateVars(c *urfave.Context) urfave.ExitCoder {
 	templateName := c.Args().Get(0)
@@ -121,29 +45,25 @@ func cliDeployServer(c *urfave.Context) urfave.ExitCoder {
 		return nil
 	}
 
-	ctx := context.Background()
-	docker, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		return urfave.Exit(err.Error(), 1)
-	}
-	defer docker.Close()
-
-	template, err := parseTemplate(templateName)
-	if err != nil {
-		return urfave.Exit(err.Error(), 1)
-	}
-
 	templateVars, err := getTemplateVars(templateName)
 	if err != nil {
 		return urfave.Exit(err.Error(), 1)
 	}
 
-	/*err := os.MkdirAll("/var/lib/conductor", os.ModePerm)
-	if err != nil {
-		return nil
-	}*/
+	for i, s := range c.Args().Slice() {
+		if i == 0 {
+			continue
+		}
 
-	err = deployContainer(ctx, docker, template, "pain", templateVars)
+		arg := strings.Split(s, "=")
+		if len(arg) != 2 {
+			continue
+		}
+
+		templateVars[arg[0]] = arg[1]
+	}
+
+	err = deployContainer(templateName, c.String("name"), templateVars)
 	if err != nil {
 		return urfave.Exit(err.Error(), 1)
 	}
@@ -158,9 +78,11 @@ func cliStartServer(c *urfave.Context) urfave.ExitCoder {
 
 func main() {
 	app := &urfave.App{
-		Name:        "conductor",
-		Description: "Easily create and manage game servers in a dockerized environment",
-		Usage:       "conductor [template name]",
+		Name:                 "conductor",
+		Version:              "1.0.0",
+		Description:          "Easily create and manage game servers in a dockerized environment",
+		Usage:                "conductor [template name]",
+		EnableBashCompletion: true,
 		Action: func(c *urfave.Context) error {
 			return cliGetTemplateVars(c)
 		},
@@ -176,7 +98,14 @@ func main() {
 			{
 				Name:        "deploy",
 				Description: "Deploy a new server",
-				Usage:       "conductor deploy [template name] [flags]",
+				Usage:       "conductor deploy [template name] [variables]",
+				Flags: []urfave.Flag{
+					&urfave.StringFlag{
+						Name:    "name",
+						Aliases: []string{"n"},
+						Usage:   "Set the name of the server",
+					},
+				},
 				Action: func(c *urfave.Context) error {
 					return cliDeployServer(c)
 				},
