@@ -40,5 +40,7 @@ actions:
   broadcast: say %s
   backup:
     directory: .
-    start: save-off
+    start: |
+      save-off
+      save-all
     finish: save-on
