@@ -7,7 +7,7 @@ info:
   name: Minecraft Velocity
   container: amazoncorretto:21-alpine
   user: velocity
-  working_dir: velocity
+  working_dir: /velocity
 
 actions:
   adduser: |

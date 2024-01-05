@@ -3,20 +3,32 @@ package main
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	urfave "github.com/urfave/cli/v2"
 	"io"
 	"os"
 )
 
-func deployContainer(templateName string, name string, templateVars map[string]string) error {
+func deployContainer(templateName string, serverName string, templateVars map[string]string) error {
+	var directory = getAppDir() + "/servers/" + serverName
+	if serverExists(serverName) {
+		return errors.New("there is already a server with that name")
+	}
+
+	err := os.MkdirAll(directory, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
-		return urfave.Exit(err.Error(), 1)
+		return err
 	}
 	defer cli.Close()
 
@@ -32,15 +44,20 @@ func deployContainer(templateName string, name string, templateVars map[string]s
 	defer out.Close()
 	io.Copy(os.Stdout, out)
 
-	/*	volume, err := cli.VolumeCreate(ctx, volume.CreateOptions{})
-		if err != nil {
-			return nil
-		}*/
-
-	createdContainer, err := cli.ContainerCreate(ctx, &container.Config{
-		Image: template.Info.Container,
-		Tty:   true,
-	}, nil, nil, nil, name)
+	createdContainer, err := cli.ContainerCreate(ctx,
+		&container.Config{
+			Image: template.Info.Container,
+			Tty:   true,
+		},
+		&container.HostConfig{
+			Mounts: []mount.Mount{
+				{
+					Type:   mount.TypeBind,
+					Source: directory,
+					Target: template.Info.WorkingDir,
+				},
+			},
+		}, nil, nil, serverName)
 	if err != nil {
 		return err
 	}
@@ -57,7 +74,7 @@ func deployContainer(templateName string, name string, templateVars map[string]s
 		"\n" + template.Actions.Adduser +
 		"\n" + saveTemplateVarsCmd(templateVars)
 
-	err = runCommandInContainer(ctx, cli, createdContainer.ID, "root", installCmd)
+	err = runCommandInContainer(createdContainer.ID, "root", installCmd)
 	if err != nil {
 		return err
 	}
@@ -65,8 +82,40 @@ func deployContainer(templateName string, name string, templateVars map[string]s
 	return nil
 }
 
-func runCommandInContainer(ctx context.Context, cli *client.Client, containerId string, user string, cmd string) error {
-	exec, err := cli.ContainerExecCreate(ctx, containerId, types.ExecConfig{
+func deleteContainer(serverName string) error {
+	ctx := context.Background()
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		return err
+	}
+	defer cli.Close()
+
+	err = cli.ContainerKill(ctx, serverName, "SIGKILL")
+	if err != nil {
+		return err
+	}
+
+	err = cli.ContainerRemove(ctx, serverName, types.ContainerRemoveOptions{RemoveVolumes: true})
+	if err != nil {
+		return err
+	}
+
+	err = os.RemoveAll(getAppDir() + "/servers/" + serverName)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func runCommandInContainer(serverName string, user string, cmd string) error {
+	ctx := context.Background()
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		return err
+	}
+	defer cli.Close()
+
+	exec, err := cli.ContainerExecCreate(ctx, serverName, types.ExecConfig{
 		User:         user,
 		Cmd:          []string{"sh", "-c", cmd},
 		Tty:          false,

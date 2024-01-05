@@ -5,7 +5,7 @@ info:
   name: Factorio
   container: alpine:latest
   user: factorio
-  working_dir: factorio
+  working_dir: /factorio
 
 actions:
   adduser: |
@@ -23,3 +23,7 @@ actions:
     mkdir mods
   start: ./bin/x64/factorio --port ${port}
   stop: /quit
+  broadcast: /s %s
+  backup:
+    directory: .
+    start: /server-save

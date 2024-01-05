@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/magiconair/properties"
 	"gopkg.in/yaml.v3"
 	"os"
 	"strings"
@@ -61,33 +62,28 @@ func getTemplateNames() ([]string, error) {
 
 func getTemplateRaw(templateName string) ([]byte, error) {
 	templateName = parseTemplateName(templateName)
-	cacheDir, err := getCacheDir()
+	err := os.MkdirAll(getAppDir()+"/templates", os.ModePerm)
 	if err != nil {
 		return nil, err
 	}
 
-	err = os.MkdirAll(cacheDir+"/templates", os.ModePerm)
+	bytes, err := os.ReadFile(getAppDir() + "/templates/" + templateName)
 	if err != nil {
-		return nil, err
+		bytes, err = downloadFile("https://raw.githubusercontent.com/MrNavaStar/Conductor/master/templates/"+templateName, getAppDir()+"/templates/"+templateName)
 	}
-
-	data, err := os.ReadFile(cacheDir + "/templates/" + templateName)
-	if err != nil {
-		data, err = downloadFile("https://raw.githubusercontent.com/MrNavaStar/Conductor/master/templates/"+templateName, cacheDir+"/templates/"+templateName)
-	}
-	return data, nil
+	return bytes, nil
 }
 
 func parseTemplate(templateName string) (Template, error) {
 	var template Template
 
 	templateName = parseTemplateName(templateName)
-	data, err := getTemplateRaw(templateName)
+	bytes, err := getTemplateRaw(templateName)
 	if err != nil {
 		return template, err
 	}
 
-	if err := yaml.Unmarshal(data, &template); err != nil {
+	if err := yaml.Unmarshal(bytes, &template); err != nil {
 		return template, err
 	}
 	return template, nil
@@ -110,6 +106,30 @@ func getTemplateVars(templateName string) (map[string]string, error) {
 	return mapToStringMap(templateMap), nil
 }
 
+func overrideTemplateVars(templateName string, cliArgs []string) (map[string]string, error) {
+	templateVars, err := getTemplateVars(templateName)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, s := range cliArgs {
+		if i == 0 {
+			continue
+		}
+
+		arg := strings.Split(s, "=")
+		if len(arg) != 2 {
+			continue
+		}
+
+		_, ok := templateVars[arg[0]]
+		if ok {
+			templateVars[arg[0]] = arg[1]
+		}
+	}
+	return templateVars, nil
+}
+
 func parseTemplateVars(templateVars map[string]string) string {
 	var cmd = ""
 	for key := range templateVars {
@@ -119,6 +139,14 @@ func parseTemplateVars(templateVars map[string]string) string {
 		cmd = key + "=" + templateVars[key] + " && " + cmd
 	}
 	return cmd
+}
+
+func parseServerTemplateVars(serverName string) (string, error) {
+	vars, err := properties.LoadFile(getAppDir()+"/servers/"+serverName+"/.conductor.properties", properties.UTF8)
+	if err != nil {
+		return "", err
+	}
+	return parseTemplateVars(vars.Map()), nil
 }
 
 func saveTemplateVarsCmd(templateVars map[string]string) string {

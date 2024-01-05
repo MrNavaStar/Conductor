@@ -7,7 +7,7 @@ info:
   name: Minecraft Folia
   container: amazoncorretto:21-alpine
   user: folia
-  working_dir: folia
+  working_dir: /folia
 
 actions:
   adduser: |
@@ -31,6 +31,7 @@ actions:
 
   start: java -Xmx${max_memory}M &{user_jvm_args} -Dterminal.jline=false -Dterminal.ansi=true -Djline.terminal=jline.UnsupportedTerminal -Dlog4j2.formatMsgNoLookups=true -jar folia.jar nogui
   stop: stop
+  broadcast: say %s
   backup:
     directory: .
     start: save-off

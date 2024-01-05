@@ -8,7 +8,7 @@ info:
   name: Minecraft Forge
   container: amazoncorretto:21-alpine
   user: forge
-  working_dir: forge
+  working_dir: /forge
 
 actions:
   adduser: |
@@ -37,6 +37,7 @@ actions:
 
   start: java -Xmx${max_memory}M &{user_jvm_args} -Dterminal.jline=false -Dterminal.ansi=true -Dlog4j2.formatMsgNoLookups=true @libraries/net/minecraftforge/forge/${forge_version}/unix_args.txt nogui || java -Xmx${max_memory}M &{user_jvm_args} -Dlog4j2.formatMsgNoLookups=true -jar forge-${forge_version}-shim.jar
   stop: stop
+  broadcast: say %s
   backup:
     directory: .
     start: save-off

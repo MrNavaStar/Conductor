@@ -8,7 +8,7 @@ info:
   name: Mindustry
   container: amazoncorretto:21-alpine
   user: mindustry
-  working_dir: mindustry
+  working_dir: /mindustry
 
 actions:
   adduser: |

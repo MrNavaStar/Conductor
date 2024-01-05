@@ -7,7 +7,7 @@ info:
   name: Minecraft Paper
   container: amazoncorretto:21-alpine
   user: paper
-  working_dir: paper
+  working_dir: /paper
 
 actions:
   adduser: |
@@ -31,6 +31,7 @@ actions:
 
   start: java -Xmx${max_memory}M &{user_jvm_args} -Dterminal.jline=false -Dterminal.ansi=true -Djline.terminal=jline.UnsupportedTerminal -Dlog4j2.formatMsgNoLookups=true -jar paper.jar nogui
   stop: stop
+  broadcast: say %s
   backup:
     directory: .
     start: save-off

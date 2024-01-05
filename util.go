@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"os"
@@ -73,10 +74,13 @@ func mapToStringMap(currentMap map[string]interface{}) map[string]string {
 	return newMap
 }
 
-func getCacheDir() (string, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
+func getAppDir() string {
+	return "/var/lib/conductor"
+}
+
+func serverExists(serverName string) bool {
+	if _, err := os.Stat(getAppDir() + "/servers/" + serverName); errors.Is(err, os.ErrNotExist) {
+		return false
 	}
-	return home + "/.cache/conductor", nil
+	return true
 }

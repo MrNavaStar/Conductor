@@ -7,7 +7,7 @@ info:
   name: Satisfactory
   container: steamcmd:latest
   user: satisfactory
-  working_dir: satisfactory
+  working_dir: /satisfactory
 
 actions:
   adduser: |
