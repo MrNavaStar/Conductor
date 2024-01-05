@@ -1,6 +1,6 @@
 port: 6567
 max_memory: 2048
-mindustry_version: 146
+mindustry_version: latest
 map_name: Wasteland
 display_name: Mindustry Server
 
@@ -15,6 +15,17 @@ actions:
     adduser -H -D mindustry mindustry
     chown -R mindustry:mindustry .
 
-  install: wget --output-document=server-release.jar https://github.com/Anuken/Mindustry/releases/download/v${mindustry_version}/server-release.jar
+  install:
+    apk add jq
+
+  update: |
+    if [ "${mindustry_version}" == "latest" ]; then
+      mindustry_version=$(wget -qO - https://api.github.com/repos/Anuken/Mindustry/releases | jq -r ".[0].tag_name")
+    fi
+    
+    wget --output-document=server-release.jar https://github.com/Anuken/Mindustry/releases/download/${mindustry_version}/server-release.jar
+    echo "Installed Mindustry ${mindustry_version}"
+
   start: java -Xmx${max_memory}M -jar server-release.jar config port ${port}, config name ${display_name}, host ${map_name}
   stop: exit
+  broadcast: say %s

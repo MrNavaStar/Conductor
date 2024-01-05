@@ -95,15 +95,12 @@ func deleteContainer(serverName string) error {
 		return err
 	}
 
-	err = cli.ContainerRemove(ctx, serverName, types.ContainerRemoveOptions{RemoveVolumes: true})
-	if err != nil {
-		return err
-	}
-
 	err = os.RemoveAll(getAppDir() + "/servers/" + serverName)
 	if err != nil {
 		return err
 	}
+
+	cli.ContainerRemove(ctx, serverName, types.ContainerRemoveOptions{RemoveVolumes: true})
 	return nil
 }
 

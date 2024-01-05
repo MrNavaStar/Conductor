@@ -15,11 +15,12 @@ type TemplateInfo struct {
 }
 
 type TemplateActions struct {
-	Adduser string
-	Install string
-	Update  string
-	Start   string
-	Stop    string
+	Adduser   string
+	Install   string
+	Update    string
+	Start     string
+	Stop      string
+	Broadcast string
 }
 
 type Template struct {
