@@ -1,0 +1,17 @@
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  server:
+    uses: ./.github/workflows/_build-linux.yml
+    secrets: inherit
+    with:
+      name: server
+
+  server-java:
+    uses: ./.github/workflows/_build-linux.yml
+    secrets: inherit
+    with:
+      name: server-java
