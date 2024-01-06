@@ -4,20 +4,7 @@ mindustry_version: latest
 map_name: Wasteland
 display_name: Mindustry Server
 
-info:
-  name: Mindustry
-  container: amazoncorretto:21-alpine
-  user: mindustry
-  working_dir: /mindustry
-
 actions:
-  adduser: |
-    adduser -H -D mindustry mindustry
-    chown -R mindustry:mindustry .
-
-  install:
-    apk add jq
-
   update: |
     if [ "${mindustry_version}" == "latest" ]; then
       mindustry_version=$(wget -qO - https://api.github.com/repos/Anuken/Mindustry/releases | jq -r ".[0].tag_name")

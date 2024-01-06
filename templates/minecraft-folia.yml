@@ -4,18 +4,10 @@ minecraft_version: latest
 user_jvm_args: ""
 
 info:
-  name: Minecraft Folia
-  container: amazoncorretto:21-alpine
-  user: folia
-  working_dir: /folia
+  container: conductor:server-java
 
 actions:
-  adduser: |
-    adduser -H -D folia folia
-    chown -R folia:folia .
-
   install: |
-    apk add jq
     echo "eula=true" > eula.txt
     echo -e "server-port=${port}\nquery.port=${port}" > server.properties
     mkdir plugins

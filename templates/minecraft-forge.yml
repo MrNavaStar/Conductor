@@ -5,18 +5,10 @@ forge_version: latest
 user_jvm_args: ""
 
 info:
-  name: Minecraft Forge
-  container: amazoncorretto:21-alpine
-  user: forge
-  working_dir: /forge
+  container: conductor:server-java
 
 actions:
-  adduser: |
-    adduser -H -D forge forge
-    chown -R forge:forge .
-
   install: |
-    apk add jq
     echo "eula=true" > eula.txt
     echo -e "server-port=${port}\nquery.port=${port}" > server.properties
     mkdir mods

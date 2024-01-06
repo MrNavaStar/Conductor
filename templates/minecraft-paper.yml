@@ -4,18 +4,10 @@ minecraft_version: latest
 user_jvm_args: ""
 
 info:
-  name: Minecraft Paper
-  container: amazoncorretto:21-alpine
-  user: paper
-  working_dir: /paper
+  container: conductor:server-java
 
 actions:
-  adduser: |
-    adduser -H -D paper paper
-    chown -R paper:paper .
-
   install: |
-    apk add jq
     echo "eula=true" > eula.txt
     echo -e "server-port=${port}\nquery.port=${port}" > server.properties
     mkdir plugins

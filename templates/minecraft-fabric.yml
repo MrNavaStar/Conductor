@@ -4,18 +4,10 @@ minecraft_version: latest
 user_jvm_args: ""
 
 info:
-  name: Minecraft Fabric
-  container: amazoncorretto:21-alpine
-  user: fabric
-  working_dir: /fabric
+  container: conductor:server-java
 
 actions:
-  adduser: |
-    adduser -H -D fabric fabric
-    chown -R fabric:fabric .
-
   install: |
-    apk add jq
     echo "eula=true" > eula.txt
     echo -e "server-port=${port}\nquery.port=${port}" > server.properties
     mkdir mods

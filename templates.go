@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/creasty/defaults"
 	"github.com/magiconair/properties"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -8,19 +9,18 @@ import (
 )
 
 type TemplateInfo struct {
-	Name       string
-	Container  string
-	User       string
-	WorkingDir string `yaml:"working_dir"`
+	Container  string `default:"conductor:server"`
+	User       string `default:"conductor"`
+	WorkingDir string `default:"/conductor" yaml:"working_dir"`
 }
 
 type TemplateActions struct {
-	Adduser   string
-	Install   string
-	Update    string
-	Start     string
-	Stop      string
-	Broadcast string
+	Adduser   string `default:""`
+	Install   string `default:""`
+	Update    string `default:""`
+	Start     string `default:""`
+	Stop      string `default:""`
+	Broadcast string `default:""`
 }
 
 type Template struct {
@@ -81,6 +81,10 @@ func parseTemplate(templateName string) (Template, error) {
 	templateName = parseTemplateName(templateName)
 	bytes, err := getTemplateRaw(templateName)
 	if err != nil {
+		return template, err
+	}
+
+	if err := defaults.Set(template); err != nil {
 		return template, err
 	}
 

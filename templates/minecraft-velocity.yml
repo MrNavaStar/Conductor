@@ -4,20 +4,10 @@ velocity_version: latest
 user_jvm_args: ""
 
 info:
-  name: Minecraft Velocity
-  container: amazoncorretto:21-alpine
-  user: velocity
-  working_dir: /velocity
+  container: conductor:server-java
 
 actions:
-  adduser: |
-    adduser -H -D velocity velocity
-    chown -R velocity:velocity .
-
-  install: |
-    apk add jq
-    mkdir plugins
-
+  install: mkdir plugins
   update: |
     if [ "${velocity_version}" == "latest" ]; then
       velocity_version=$(wget -qO - https://api.papermc.io/v2/projects/velocity/ | jq -r ".versions[-1]")

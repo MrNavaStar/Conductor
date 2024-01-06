@@ -71,7 +71,6 @@ func deployContainer(templateName string, serverName string, templateVars map[st
 		"\ncd " + template.Info.WorkingDir +
 		"\n" + template.Actions.Install +
 		"\n" + template.Actions.Update +
-		"\n" + template.Actions.Adduser +
 		"\n" + saveTemplateVarsCmd(templateVars)
 
 	err = runCommandInContainer(createdContainer.ID, "root", installCmd)

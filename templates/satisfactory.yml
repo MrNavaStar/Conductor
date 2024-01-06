@@ -4,13 +4,11 @@ beacon_port: 15000
 satisfactory_branch: public
 
 info:
-  name: Satisfactory
   container: steamcmd:latest
   user: satisfactory
-  working_dir: /satisfactory
 
 actions:
-  adduser: |
+  install: |
     adduser -H -D satisfactory satisfactory
     chown -R satisfactory:satisfactory .
 

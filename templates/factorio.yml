@@ -1,17 +1,7 @@
 port: 34197
 factorio_version: latest
 
-info:
-  name: Factorio
-  container: alpine:latest
-  user: factorio
-  working_dir: /factorio
-
 actions:
-  adduser: |
-    adduser -H -D factorio factorio
-    chown -R factorio:factorio .
-
   install: |
     cd ..
     
