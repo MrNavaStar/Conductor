@@ -2,10 +2,7 @@ port: 34197
 factorio_version: latest
 
 actions:
-  install: |
-    mkdir saves
-    mkdir mods
-
+  install: mkdir saves mods
   update: |
     wget --output-document=factorio.tar.xz https://www.factorio.com/get-download/latest/headless/linux64
     tar --no-same-owner -xvf factorio.tar.xz
