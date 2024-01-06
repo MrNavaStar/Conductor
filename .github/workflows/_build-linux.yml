@@ -2,10 +2,6 @@ name: Build Linux Image Template
 on:
   workflow_call:
     inputs:
-      path:
-        type: string
-        required: true
-        description: "Path of the dockerfile to build"
       name:
         type: string
         required: true
