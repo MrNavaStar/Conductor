@@ -21,22 +21,20 @@ jobs:
         id: changed-dockerfile
         uses: tj-actions/changed-files@v41
         with:
-          files_yaml: |
-            dockerfiles:
-              - dockerfiles/${{ inputs.name }}/Dockerfile
+          files: dockerfiles/${{ inputs.name }}/Dockerfile
 
       - name: Docker Login
-        if: steps.changed-dockerfile.outputs.test_any_changed == 'true'
+        if: steps.changed-dockerfile.outputs.any_changed == 'true'
         run: echo ${{ secrets.DOCKER_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
       - name: Build Image
-        if: steps.changed-dockerfile.outputs.test_any_changed == 'true'
+        if: steps.changed-dockerfile.outputs.any_changed == 'true'
         run: docker build -t mrnavastar/conductor:${{ inputs.name }} .
         working-directory: dockerfiles/${{ inputs.name }}
 
       # master
       - name: Tag Image
-        if: ${{ (steps.changed-dockerfile.outputs.test_any_changed == 'true') && (github.ref == 'refs/heads/master') && (inputs.tags != '') }}
+        if: ${{ (steps.changed-dockerfile.outputs.any_changed == 'true') && (github.ref == 'refs/heads/master') && (inputs.tags != '') }}
         run: >
           for TAG in ${{ inputs.tags }};
           do
@@ -44,5 +42,5 @@ jobs:
           done
 
       - name: Push Image
-        if: ${{ (steps.changed-dockerfile.outputs.test_any_changed == 'true') && (github.ref == 'refs/heads/master') }}
+        if: ${{ (steps.changed-dockerfile.outputs.any_changed == 'true') && (github.ref == 'refs/heads/master') }}
         run: docker push mrnavastar/conductor --all-tags
