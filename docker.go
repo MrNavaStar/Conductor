@@ -20,11 +20,6 @@ func deployContainer(templateName string, serverName string, templateVars map[st
 		return errors.New("there is already a server with that name")
 	}
 
-	err := os.MkdirAll(directory, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -43,6 +38,11 @@ func deployContainer(templateName string, serverName string, templateVars map[st
 	}
 	defer out.Close()
 	io.Copy(os.Stdout, out)
+
+	err = os.MkdirAll(directory, os.ModePerm)
+	if err != nil {
+		return err
+	}
 
 	createdContainer, err := cli.ContainerCreate(ctx,
 		&container.Config{
@@ -66,14 +66,23 @@ func deployContainer(templateName string, serverName string, templateVars map[st
 		return err
 	}
 
-	var installCmd = parseTemplateVars(templateVars) +
+	var rootInstallCmd = parseTemplateVars(templateVars) +
 		"mkdir " + template.Info.WorkingDir +
+		"\ncd " + template.Info.WorkingDir +
+		"\n" + template.Actions.RootInstall
+
+	err = runCommandInContainer(createdContainer.ID, "root", rootInstallCmd)
+	if err != nil {
+		return err
+	}
+
+	var installCmd = parseTemplateVars(templateVars) +
 		"\ncd " + template.Info.WorkingDir +
 		"\n" + template.Actions.Install +
 		"\n" + template.Actions.Update +
 		"\n" + saveTemplateVarsCmd(templateVars)
 
-	err = runCommandInContainer(createdContainer.ID, "root", installCmd)
+	err = runCommandInContainer(createdContainer.ID, template.Info.User, installCmd)
 	if err != nil {
 		return err
 	}

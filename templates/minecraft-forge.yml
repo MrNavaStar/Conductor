@@ -5,7 +5,7 @@ forge_version: latest
 user_jvm_args: ""
 
 info:
-  container: conductor:server-java
+  container: mrnavastar/conductor:server-java
 
 actions:
   install: |

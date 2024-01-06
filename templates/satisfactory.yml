@@ -8,7 +8,7 @@ info:
   user: satisfactory
 
 actions:
-  install: |
+  root-install: |
     adduser -H -D satisfactory satisfactory
     chown -R satisfactory:satisfactory .
 

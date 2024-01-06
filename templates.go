@@ -9,18 +9,18 @@ import (
 )
 
 type TemplateInfo struct {
-	Container  string `default:"conductor:server"`
+	Container  string `default:"mrnavastar/conductor:server"`
 	User       string `default:"conductor"`
-	WorkingDir string `default:"/conductor" yaml:"working_dir"`
+	WorkingDir string `default:"/conductor" yaml:"working-dir"`
 }
 
 type TemplateActions struct {
-	Adduser   string `default:""`
-	Install   string `default:""`
-	Update    string `default:""`
-	Start     string `default:""`
-	Stop      string `default:""`
-	Broadcast string `default:""`
+	RootInstall string `default:"" yaml:"root-install"`
+	Install     string `default:""`
+	Update      string `default:""`
+	Start       string `default:""`
+	Stop        string `default:""`
+	Broadcast   string `default:""`
 }
 
 type Template struct {
@@ -84,7 +84,7 @@ func parseTemplate(templateName string) (Template, error) {
 		return template, err
 	}
 
-	if err := defaults.Set(template); err != nil {
+	if err := defaults.Set(&template); err != nil {
 		return template, err
 	}
 
@@ -155,7 +155,7 @@ func parseServerTemplateVars(serverName string) (string, error) {
 }
 
 func saveTemplateVarsCmd(templateVars map[string]string) string {
-	var cmd = "echo -e \"# This file is auto generated, DO NOT MODIFY!!!\n# Modifying incorrectly may break this server.\n"
+	var cmd = "rm -f .conductor.properties && echo -e \"# This file is auto generated, DO NOT MODIFY!!!\n# Modifying incorrectly may break this server.\n"
 	for key := range templateVars {
 		cmd += key + "=${" + key + "}\n"
 	}

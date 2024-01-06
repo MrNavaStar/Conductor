@@ -4,6 +4,9 @@ mindustry_version: latest
 map_name: Wasteland
 display_name: Mindustry Server
 
+info:
+  container: mrnavastar/conductor:server-java
+
 actions:
   update: |
     if [ "${mindustry_version}" == "latest" ]; then
