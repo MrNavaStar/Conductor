@@ -36,13 +36,13 @@ jobs:
 
       # master
       - name: Tag Image
-        if: steps.changed-dockerfile.outputs.test_any_changed == 'true' && ${{ (github.ref == 'refs/heads/master') && (inputs.tags != '') }}
+        if: ${{ (steps.changed-dockerfile.outputs.test_any_changed == 'true') && (github.ref == 'refs/heads/master') && (inputs.tags != '') }}
         run: >
           for TAG in ${{ inputs.tags }};
           do
-            docker tag steamcmd/steamcmd:${{ inputs.name }} steamcmd/steamcmd:${TAG};
+            docker tag mrnavastar/conductor:${{ inputs.name }} mrnavastar/conductor:${TAG};
           done
 
       - name: Push Image
-        if: steps.changed-dockerfile.outputs.test_any_changed == 'true' && ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ (steps.changed-dockerfile.outputs.test_any_changed == 'true') && (github.ref == 'refs/heads/master') }}
         run: docker push mrnavastar/conductor --all-tags
