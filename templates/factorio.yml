@@ -3,14 +3,14 @@ factorio_version: latest
 
 actions:
   install: |
-    cd ..
-    
-    wget --output-document=factorio.tar.xz https://www.factorio.com/get-download/latest/headless/linux64
-    tar --no-same-owner -xvf factorio.tar.xz
-    rm -f factorio.tar.xz
-    cd factorio
     mkdir saves
     mkdir mods
+
+  update: |
+    wget --output-document=factorio.tar.xz https://www.factorio.com/get-download/latest/headless/linux64
+    tar --no-same-owner -xvf factorio.tar.xz
+    mv -f factorio/* .
+    rm -f -R factorio factorio.tar.xz
   start: ./bin/x64/factorio --port ${port}
   stop: /quit
   broadcast: /s %s

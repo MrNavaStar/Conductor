@@ -26,6 +26,7 @@ actions:
     wget --output-document=forge-installer.jar https://maven.minecraftforge.net/net/minecraftforge/forge/${minecraft_version}-${forge_version}/forge-${minecraft_version}-${forge_version}-installer.jar
     java -Xmx${max_memory}M -jar forge-installer.jar --installServer
     rm -f forge-installer.jar start.bat start.sh
+    echo "Installed Forge ${forge_version} for ${minecraft_version}"
 
   start: java -Xmx${max_memory}M &{user_jvm_args} -Dterminal.jline=false -Dterminal.ansi=true -Dlog4j2.formatMsgNoLookups=true @libraries/net/minecraftforge/forge/${forge_version}/unix_args.txt nogui || java -Xmx${max_memory}M &{user_jvm_args} -Dlog4j2.formatMsgNoLookups=true -jar forge-${forge_version}-shim.jar
   stop: stop
