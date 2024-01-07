@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.4
 RUN mkdir /conductor
 
 ARG GLIBC_VERSION=2.23-r3
