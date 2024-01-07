@@ -1,6 +1,7 @@
 FROM debian:buster-slim
 RUN mkdir /conductor
 
+# Packages
 RUN apt-get update
 RUN apt-get install jq -y
 
