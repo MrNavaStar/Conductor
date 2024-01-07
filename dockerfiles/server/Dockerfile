@@ -2,8 +2,8 @@
 #FROM busybox:stable-glibc as server
 FROM gcr.io/distroless/base-debian11:debug as server
 
-SHELL ["/busybox/sh"]
-RUN mv /busybox/* /bin
+SHELL ["/busybox/sh", "-c"]
+#RUN mv /busybox/* /bin
 # Binaries for glibc
 #COPY --from=base /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libdl.so.2
 #COPY --from=base /lib/x86_64-linux-gnu/librt.so.1 /lib/x86_64-linux-gnu/librt.so.1
@@ -20,4 +20,4 @@ RUN rm /bin/adduser /bin/chown
 # Flatten Image
 FROM scratch
 COPY --from=server / /
-CMD ["/bin/sh"]
+CMD ["/busybox/sh", "-c"]
