@@ -16,12 +16,16 @@ RUN set -ux \
             curl gnupg software-properties-common binutils java-21-amazon-corretto-jdk=1:$JAVA_VERSION
 
 FROM mrnavastar/conductor:server as server-java
+# Binaries
+COPY --from=base /lib/x86_64-linux-gnu/libz.so.1.2.11 /lib/x86_64-linux-gnu/libz.so.1.2.11
+COPY --from=base /lib/x86_64-linux-gnu/libudev.so.1.6.13 /lib/x86_64-linux-gnu/libudev.so.1.6.13
+# Create symlinks
+RUN ln -s /lib/x86_64-linux-gnu/libz.so.1.2.11 /lib/x86_64-linux-gnu/libz.so.1
+RUN ln -s /lib/x86_64-linux-gnu/libudev.so.1.6.13 /lib/x86_64-linux-gnu/libudev.so.1
 
+# Java
 RUN mkdir -p /usr/lib/jvm
 COPY --from=base /opt/corretto-slim /usr/lib/jvm/java-21-amazon-corretto
-COPY --from=base /lib/x86_64-linux-gnu/libz.so.1.2.11 /lib/x86_64-linux-gnu/libz.so.1.2.11
-RUN ln -s /lib/x86_64-linux-gnu/libz.so.1.2.11 /lib/x86_64-linux-gnu/libz.so.1
-
 RUN jdk_tools="java keytool rmid rmiregistry javac jaotc jlink jmod jhsdb jar jarsigner javadoc javap jcmd jconsole jdb jdeps jdeprscan jimage jinfo jmap jps jrunscript jshell jstack jstat jstatd serialver" \
     && priority=$(echo "1${JAVA_VERSION}" | sed "s/\(\.\|-\)//g") \
     && for i in ${jdk_tools}; do \
