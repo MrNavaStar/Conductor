@@ -13,5 +13,6 @@ jobs:
   server-java:
     uses: ./.github/workflows/_build-linux.yml
     secrets: inherit
+    needs: server
     with:
       name: server-java
