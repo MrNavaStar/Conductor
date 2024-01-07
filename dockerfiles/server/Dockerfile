@@ -12,7 +12,7 @@ RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-l
 
 # Binaries
 COPY --from=base /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libdl.so.2
-COPY --from=base /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libdl.so.2
+COPY --from=base /lib/x86_64-linux-gnu/librt.so.1 /lib/x86_64-linux-gnu/librt.so.1
 
 # Flatten Image
 FROM scratch
