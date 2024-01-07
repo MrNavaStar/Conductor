@@ -9,7 +9,7 @@ info:
 actions:
   install: mkdir plugins
   update: |
-    if echo ${velocity_version} | grep latest; then
+    if echo ${velocity_version} | grep -q latest; then
       velocity_version=$(wget -qO - https://api.papermc.io/v2/projects/velocity/ | jq -r ".versions[-1]")
     fi
     

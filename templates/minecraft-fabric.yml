@@ -14,7 +14,7 @@ actions:
 
   update: |
     wget --output-document=fabric-installer.jar $(wget -qO - https://meta.fabricmc.net/v2/versions/installer | jq -r ".[0].url")
-    if echo ${minecraft_version} | grep latest; then
+    if echo ${minecraft_version} | grep -q latest; then
       java -Xmx${max_memory}M -jar fabric-installer.jar server -downloadMinecraft
     else
       java -Xmx${max_memory}M -jar fabric-installer.jar server -downloadMinecraft -snapshot -mcversion ${minecraft_version}
