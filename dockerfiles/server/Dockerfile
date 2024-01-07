@@ -1,5 +1,5 @@
-FROM busybox:stable-glibc as busybox
-FROM gcr.io/distroless/static-debian12:latest
+FROM busybox:stable-uclibc as busybox
+FROM gcr.io/distroless/static-debian12:debug
 
 COPY --from=busybox /bin/sh /bin/sh
 # Commands for templates
