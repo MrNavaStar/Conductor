@@ -26,6 +26,8 @@ RUN jdk_tools="java keytool rmid rmiregistry javac jaotc jlink jmod jhsdb jar ja
           ln -s /usr/lib/jvm/java-21-amazon-corretto/bin/$i /usr/bin/$i; \
        done
 
+run wget -O zlib.deb ftp.us.debian.org/debian/pool/main/z/zlib/zlib1g-dev_1.3.dfsg-3_amd64.deb && dpkg --install zlib.deb
+
 ENV LANG C.UTF-8
 ENV JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto
 
