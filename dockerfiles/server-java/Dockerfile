@@ -20,7 +20,7 @@ RUN set -ux \
           update-alternatives --install /usr/bin/$i $i /usr/lib/jvm/java-21-amazon-corretto/bin/$i ${priority}; \
        done
 
-FROM mrnavastar/conductor:server
+FROM mrnavastar/conductor:server as server-java
 
 RUN mkdir -p /usr/lib/jvm
 COPY --from=base /opt/corretto-slim /usr/lib/jvm/java-21-amazon-corretto
@@ -36,5 +36,5 @@ ENV JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto
 
 # Flatten Image
 FROM scratch
-COPY --from=server / /
+COPY --from=server-java / /
 CMD ["/bin/sh", "-c", "tail", "-f", "/dev/null"]
