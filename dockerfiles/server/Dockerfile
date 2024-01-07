@@ -1,5 +1,5 @@
 FROM busybox:stable-uclibc as busybox
-FROM gcr.io/distroless/static-debian12:latest as server
+FROM gcr.io/distroless/base-debian12:latest as server
 
 # Shell
 COPY --from=busybox /bin/sh /bin/sh
