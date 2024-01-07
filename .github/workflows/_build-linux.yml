@@ -10,6 +10,10 @@ on:
         type: string
         required: false
         description: "Extra tags to use besides main tag."
+      files:
+        type: string
+        required: false
+        description: "Extra files to watch for change"
 
 jobs:
   build:
@@ -21,7 +25,7 @@ jobs:
         id: changed-dockerfile
         uses: tj-actions/changed-files@v41
         with:
-          files: dockerfiles/${{ inputs.name }}/Dockerfile
+          files_yaml: ${{ inputs.files }} dockerfiles/${{ inputs.name }}/Dockerfile
 
       - name: Docker Login
         if: steps.changed-dockerfile.outputs.any_changed == 'true'

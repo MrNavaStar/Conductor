@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM gcr.io/distroless/static-debian12:latest
 RUN mkdir /conductor
 
 # Packages

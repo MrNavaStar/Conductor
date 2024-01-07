@@ -16,3 +16,4 @@ jobs:
     needs: server
     with:
       name: server-java
+      files: dockerfiles/server/Dockerfile
