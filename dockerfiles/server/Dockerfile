@@ -1,6 +1,7 @@
 #FROM busybox:stable-glibc as server
 FROM nimmis/alpine-glibc as server
 
+
 # External packages
 RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 && chmod +x /bin/jq
 
@@ -13,3 +14,4 @@ RUN chown -R conductor /conductor
 # Flatten Image
 FROM scratch
 COPY --from=server / /
+CMD ["/bin/sh", "-c", "sleep infinity"]
