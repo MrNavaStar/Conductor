@@ -14,4 +14,4 @@ RUN chown -R conductor /conductor
 # Flatten Image
 FROM scratch
 COPY --from=server / /
-CMD ["/bin/sh", "-c", "sleep infinity"]
+CMD ["/bin/sh", "-c", "tail", "-f", "/dev/null"]
