@@ -2,22 +2,24 @@ FROM busybox:stable-uclibc as busybox
 FROM gcr.io/distroless/static-debian12:latest
 
 # Shell
-COPY --from=busybox /bin/sh /bin/sh
-# Commands for templates
-COPY --from=busybox /bin/mkdir /bin/mkdir
-COPY --from=busybox /bin/ls /bin/ls
-COPY --from=busybox /bin/cat /bin/cat
-COPY --from=busybox /bin/rm /bin/rm
-COPY --from=busybox /bin/mv /bin/mv
-COPY --from=busybox /bin/cp /bin/cp
-COPY --from=busybox /bin/echo /bin/echo
-COPY --from=busybox /bin/tar /bin/tar
-COPY --from=busybox /bin/wget /bin/wget
+COPY --from=busybox /bin/sh \
+    /bin/mkdir \
+    /bin/ls \
+    /bin/cat \
+    /bin/rm \
+    /bin/mv \
+    /bin/cp \
+    bin/echo \
+    /bin/tar \
+    /bin/wget \
+    /bin/adduser \
+    /bin/chown \
+    /bin/chmod \
+    /bin/
 
 # External packages
-RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64
-
-# User setup
-RUN mkdir /conductor
-RUN adduser --no-create-home --disabled-password conductor
-RUN chown -R conductor:conductor /conductor
+RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 \
+    # User Setup
+    && mkdir /conductor \
+    && adduser --no-create-home --disabled-password conductor \
+    && chown -R conductor:conductor /conductor
