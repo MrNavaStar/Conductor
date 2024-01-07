@@ -33,4 +33,4 @@ RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-l
 # Flatten Image
 FROM scratch
 COPY --from=server / /
-CMD ["/bin/sh", "-c"]
+ENTRYPOINT ["/bin/sh", "-c"]
