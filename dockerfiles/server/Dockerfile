@@ -1,11 +1,11 @@
-FROM gcr.io/distroless/base-debian11:debug as base
-FROM busybox:stable-glibc as server
+#FROM gcr.io/distroless/base-debian11:debug as base
+#FROM busybox:stable-glibc as server
+FROM gcr.io/distroless/base-debian11:debug as server
 
+RUN mv /busybox/* /bin
 # Binaries for glibc
-RUN rm -R -f lib lib64
-COPY --from=base /bin /bin
-COPY --from=base /lib /lib
-COPY --from=base /lib64 /lib64
+#COPY --from=base /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libdl.so.2
+#COPY --from=base /lib/x86_64-linux-gnu/librt.so.1 /lib/x86_64-linux-gnu/librt.so.1
 
 # External packages
 RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 && chmod +x /bin/jq
