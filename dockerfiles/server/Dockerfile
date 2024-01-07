@@ -1,11 +1,8 @@
 FROM busybox:stable-uclibc as busybox
-FROM gcr.io/distroless/base-debian12:latest as server
+FROM busybox:stable-glibc as server
 
 # Shell
 COPY --from=busybox /bin/sh /bin/sh
-COPY --from=busybox /bin/kill /bin/kill
-COPY --from=busybox /bin/pkill /bin/pkill
-COPY --from=busybox /bin/killall /bin/killall
 # Commands for templates
 COPY --from=busybox /bin/mkdir /bin/mkdir
 COPY --from=busybox /bin/ls /bin/ls
@@ -33,4 +30,4 @@ RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-l
 # Flatten Image
 FROM scratch
 COPY --from=server / /
-ENTRYPOINT ["/bin/sh", "-c"]
+CMD ["/bin/sh"]
