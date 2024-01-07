@@ -20,7 +20,7 @@ FROM mrnavastar/conductor:server as server-java
 RUN mkdir -p /usr/lib/jvm
 COPY --from=base /opt/corretto-slim /usr/lib/jvm/java-21-amazon-corretto
 COPY --from=base /lib/x86_64-linux-gnu/libz.so.1.2.11 /lib/x86_64-linux-gnu/libz.so.1.2.11
-RUN ln -s /lib/x86_64-linux-gnu/libz.so.1 libz.so.1.2.11
+RUN ln -s /lib/x86_64-linux-gnu/libz.so.1.2.11 /lib/x86_64-linux-gnu/libz.so.1
 
 RUN jdk_tools="java keytool rmid rmiregistry javac jaotc jlink jmod jhsdb jar jarsigner javadoc javap jcmd jconsole jdb jdeps jdeprscan jimage jinfo jmap jps jrunscript jshell jstack jstat jstatd serialver" \
     && priority=$(echo "1${JAVA_VERSION}" | sed "s/\(\.\|-\)//g") \
