@@ -1,8 +1,8 @@
-#FROM gcr.io/distroless/base-debian11:debug as base
+FROM gcr.io/distroless/base-debian11:debug as base
 #FROM busybox:stable-glibc as server
-FROM gcr.io/distroless/base-debian11:debug as server
+FROM gcr.io/distroless/base-debian11:latest as server
 
-SHELL ["/busybox/sh", "-c"]
+COPY --from=base /busybox /bin
 #RUN mv /busybox/* /bin
 # Binaries for glibc
 #COPY --from=base /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libdl.so.2
@@ -20,4 +20,4 @@ RUN chown -R conductor /conductor
 # Flatten Image
 FROM scratch
 COPY --from=server / /
-CMD ["/busybox/sh", "-c"]
+CMD ["/bin/sh", "-c"]
