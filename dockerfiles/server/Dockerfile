@@ -9,7 +9,7 @@ COPY --from=busybox /bin/sh \
     /bin/rm \
     /bin/mv \
     /bin/cp \
-    bin/echo \
+    /bin/echo \
     /bin/tar \
     /bin/wget \
     /bin/adduser \
