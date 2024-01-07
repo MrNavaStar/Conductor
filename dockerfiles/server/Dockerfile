@@ -2,7 +2,6 @@ FROM debian:buster-slim
 RUN mkdir /conductor
 
 # Packages
-RUN apt-get update
 RUN apt-get update && apt-get install jq -y && apt clean && rm -rf /var/lib/apt/lists/*
 
 # User setup
