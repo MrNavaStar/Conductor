@@ -14,10 +14,10 @@
 #COPY --from=server / /
 #CMD ["/bin/sh", "-c", "tail", "-f", "/dev/null"]
 
-FROM gcr.io/distroless/base-debian12:debug as base
+FROM busybox:stable-uclibc as base
 FROM gcr.io/distroless/base-debian12:latest as server
 
-COPY --from=base /busybox /bin
+COPY --from=base /bin /bin
 
 # External packages
 RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 && chmod +x /bin/jq
