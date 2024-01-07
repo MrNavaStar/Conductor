@@ -19,14 +19,14 @@ FROM mrnavastar/conductor:server as server-java
 
 RUN mkdir -p /usr/lib/jvm
 COPY --from=base /opt/corretto-slim /usr/lib/jvm/java-21-amazon-corretto
+COPY --from=base /lib/x86_64-linux-gnu/libz.so.1.2.11 /lib/x86_64-linux-gnu/libz.so.1.2.11
+RUN ln -s /lib/x86_64-linux-gnu/libz.so.1 libz.so.1.2.11
 
 RUN jdk_tools="java keytool rmid rmiregistry javac jaotc jlink jmod jhsdb jar jarsigner javadoc javap jcmd jconsole jdb jdeps jdeprscan jimage jinfo jmap jps jrunscript jshell jstack jstat jstatd serialver" \
     && priority=$(echo "1${JAVA_VERSION}" | sed "s/\(\.\|-\)//g") \
     && for i in ${jdk_tools}; do \
           ln -s /usr/lib/jvm/java-21-amazon-corretto/bin/$i /usr/bin/$i; \
        done
-
-run wget -O zlib.deb ftp.us.debian.org/debian/pool/main/z/zlib/zlib1g-dev_1.3.dfsg-3_amd64.deb && dpkg --install zlib.deb
 
 ENV LANG C.UTF-8
 ENV JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto
