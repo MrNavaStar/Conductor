@@ -2,7 +2,7 @@ FROM gcr.io/distroless/base-debian11:debug as base
 FROM busybox:stable-glibc as server
 
 # Binaries for glibc
-RUN rm -f lib lib64
+RUN rm -R -f lib lib64
 COPY --from=base /bin /bin
 COPY --from=base /lib /lib
 COPY --from=base /lib64 /lib64
