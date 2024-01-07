@@ -24,10 +24,8 @@ RUN adduser --no-create-home --disabled-password conductor
 RUN chown -R conductor /conductor
 RUN rm /bin/adduser /bin/chown
 
-USER conductor
-
 # External packages
-RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64
+RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 && chmod +x /bin/jq
 
 # Flatten Image
 FROM scratch
