@@ -1,5 +1,5 @@
 FROM mrnavastar/conductor:server
-ARG JAVA_VERSION=21
+ARG JAVA_VERSION=21.0.1.12-1
 
 # Install amazon corretto
 #RUN apt-get update && apt-get install java-common -y && apt clean && rm -rf /var/lib/apt/lists/*
