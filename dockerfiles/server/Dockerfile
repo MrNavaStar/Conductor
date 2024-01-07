@@ -2,7 +2,7 @@ FROM busybox:stable-uclibc as busybox
 FROM gcr.io/distroless/static-debian12:debug as server
 
 # Shell
-COPY --from=busybox /bin/bash /bin/bash
+COPY --from=busybox /bin/sh /bin/sh
 # Commands for templates
 COPY --from=busybox /bin/mkdir /bin/mkdir
 COPY --from=busybox /bin/ls /bin/ls
@@ -30,4 +30,4 @@ RUN rm /bin/adduser /bin/chown
 # Flatten Image
 FROM scratch
 COPY --from=server / /
-CMD ["/bin/bash"]
+CMD ["/bin/sh"]

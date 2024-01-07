@@ -122,7 +122,7 @@ func runCommandInContainer(serverName string, user string, cmd string) error {
 
 	exec, err := cli.ContainerExecCreate(ctx, serverName, types.ExecConfig{
 		User:         user,
-		Cmd:          []string{"bash", "-c", cmd},
+		Cmd:          []string{"sh", "-c", cmd},
 		Tty:          false,
 		AttachStdout: true,
 		AttachStderr: true,
