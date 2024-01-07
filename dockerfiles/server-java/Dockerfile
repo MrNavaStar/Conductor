@@ -1,4 +1,4 @@
-FROM mrnavastar/conductor:server
+FROM debian:buster-slim as base
 ARG JAVA_VERSION=21.0.1.12-1
 
 # Install minimal amazon corretto - https://github.com/corretto/corretto-docker/blob/main/21/slim/debian/Dockerfile
@@ -14,11 +14,20 @@ RUN set -ux \
     && jlink --add-modules "$(java --list-modules | sed -e 's/@[0-9].*$/,/' | tr -d \\n)" --no-man-pages --no-header-files --strip-debug --output /opt/corretto-slim \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
             curl gnupg software-properties-common binutils java-21-amazon-corretto-jdk=1:$JAVA_VERSION \
-    && apt-get clean  \
-    && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /usr/lib/jvm \
-    && mv /opt/corretto-slim /usr/lib/jvm/java-21-amazon-corretto \
+    #&& mkdir -p /usr/lib/jvm \
+    #&& mv /opt/corretto-slim /usr/lib/jvm/java-21-amazon-corretto \
     && jdk_tools="java keytool rmid rmiregistry javac jaotc jlink jmod jhsdb jar jarsigner javadoc javap jcmd jconsole jdb jdeps jdeprscan jimage jinfo jmap jps jrunscript jshell jstack jstat jstatd serialver" \
+    && priority=$(echo "1${JAVA_VERSION}" | sed "s/\(\.\|-\)//g") \
+    && for i in ${jdk_tools}; do \
+          update-alternatives --install /usr/bin/$i $i /usr/lib/jvm/java-21-amazon-corretto/bin/$i ${priority}; \
+       done
+
+FROM mrnavastar/conductor:server
+
+RUN mkdir -p /usr/lib/jvm
+COPY --from=base /opt/corretto-slim /usr/lib/jvm/java-21-amazon-corretto
+
+RUN jdk_tools="java keytool rmid rmiregistry javac jaotc jlink jmod jhsdb jar jarsigner javadoc javap jcmd jconsole jdb jdeps jdeprscan jimage jinfo jmap jps jrunscript jshell jstack jstat jstatd serialver" \
     && priority=$(echo "1${JAVA_VERSION}" | sed "s/\(\.\|-\)//g") \
     && for i in ${jdk_tools}; do \
           update-alternatives --install /usr/bin/$i $i /usr/lib/jvm/java-21-amazon-corretto/bin/$i ${priority}; \
@@ -26,3 +35,8 @@ RUN set -ux \
 
 ENV LANG C.UTF-8
 ENV JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto
+
+# Flatten Image
+FROM scratch
+COPY --from=server / /
+CMD ["/bin/sh", "-c", "tail", "-f", "/dev/null"]
