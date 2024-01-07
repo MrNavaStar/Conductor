@@ -2,7 +2,7 @@
 #FROM busybox:stable-glibc as server
 FROM gcr.io/distroless/base-debian11:debug as server
 
-RUN mv /busybox/* /bin
+RUN ./busybox/sh -c mv /busybox/* /bin
 # Binaries for glibc
 #COPY --from=base /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libdl.so.2
 #COPY --from=base /lib/x86_64-linux-gnu/librt.so.1 /lib/x86_64-linux-gnu/librt.so.1
