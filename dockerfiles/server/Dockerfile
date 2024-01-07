@@ -22,4 +22,4 @@ RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-l
     # User Setup
     && mkdir /conductor \
     && adduser --no-create-home --disabled-password conductor \
-    && chown -R conductor:conductor /conductor
+    && chown -R conductor /conductor
