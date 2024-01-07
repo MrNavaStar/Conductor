@@ -4,6 +4,8 @@ FROM gcr.io/distroless/base-debian12:latest as server
 # Shell
 COPY --from=busybox /bin/sh /bin/sh
 COPY --from=busybox /bin/kill /bin/kill
+COPY --from=busybox /bin/pkill /bin/pkill
+COPY --from=busybox /bin/killall /bin/killall
 # Commands for templates
 COPY --from=busybox /bin/mkdir /bin/mkdir
 COPY --from=busybox /bin/ls /bin/ls
