@@ -1,5 +1,5 @@
 FROM busybox:stable-uclibc as busybox
-FROM gcr.io/distroless/static-debian12:debug as server
+FROM gcr.io/distroless/static-debian12:latest as server
 
 # Shell
 COPY --from=busybox /bin/sh /bin/sh
@@ -18,14 +18,16 @@ COPY --from=busybox /bin/chmod /bin/chmod
 COPY --from=busybox /bin/adduser /bin/adduser
 COPY --from=busybox /bin/chown /bin/chown
 
-# External packages
-RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64
-
 # User Setup
 RUN mkdir /conductor
 RUN adduser --no-create-home --disabled-password conductor
 RUN chown -R conductor /conductor
 RUN rm /bin/adduser /bin/chown
+
+USER conductor
+
+# External packages
+RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64
 
 # Flatten Image
 FROM scratch
