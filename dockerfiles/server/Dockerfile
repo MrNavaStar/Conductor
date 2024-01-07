@@ -1,7 +1,7 @@
 FROM alpine:latest
 RUN mkdir /conductor
 
-ARG GLIBC_VERSION=2.34-r0
+ARG GLIBC_VERSION=2.23-r3
 
 RUN apk --no-cache add jq ca-certificates openssl
 
