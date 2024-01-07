@@ -13,7 +13,7 @@ actions:
     mkdir plugins
 
   update: |
-    if [ "${minecraft_version}" == "latest" ]; then
+    if echo ${minecraft_version} | grep latest; then
       minecraft_version=$(wget -qO - https://api.papermc.io/v2/projects/folia/ | jq -r ".versions[-1]")
     fi
     

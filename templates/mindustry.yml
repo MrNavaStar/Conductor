@@ -9,7 +9,7 @@ info:
 
 actions:
   update: |
-    if [ "${mindustry_version}" == "latest" ]; then
+    if echo ${mindustry_version} | grep latest; then
       mindustry_version=$(wget -qO - https://api.github.com/repos/Anuken/Mindustry/releases | jq -r ".[0].tag_name")
     fi
     

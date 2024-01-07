@@ -14,11 +14,11 @@ actions:
     mkdir mods
 
   update:
-    if [ "${minecraft_version}" == "latest" ]; then
+    if echo ${minecraft_version} | grep latest; then
       minecraft_version=$(wget -qO - https://piston-meta.mojang.com/mc/game/version_manifest_v2.json | jq -r ".latest.release")
     fi
     
-    if [ "${forge_version}" == "latest" ]; then
+    if echo ${forge_version} | grep latest; then
       forge_version=$(wget -qO - https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json | jq -r --arg mc "${minecraft_version}" '.promos."\($mc)-latest"')
     fi
     
