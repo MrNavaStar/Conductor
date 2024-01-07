@@ -6,5 +6,5 @@ RUN apt-get update
 RUN apt-get install jq -y
 
 # User setup
-RUN adduser --no-create-home --disabled-password conductor conductor
+RUN adduser --no-create-home --disabled-password conductor
 RUN chown -R conductor:conductor /conductor
