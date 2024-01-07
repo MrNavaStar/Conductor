@@ -33,3 +33,4 @@ COPY --from=base /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libdl.so
 # Flatten Image
 FROM scratch
 COPY --from=server / /
+CMD ["/bin/sh"]
