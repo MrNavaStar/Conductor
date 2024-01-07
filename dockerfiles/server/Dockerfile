@@ -1,12 +1,5 @@
-FROM gcr.io/distroless/base-debian11:debug as base
 #FROM busybox:stable-glibc as server
-FROM gcr.io/distroless/base-debian11:latest as server
-
-COPY --from=base /busybox /bin
-#RUN mv /busybox/* /bin
-# Binaries for glibc
-#COPY --from=base /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libdl.so.2
-#COPY --from=base /lib/x86_64-linux-gnu/librt.so.1 /lib/x86_64-linux-gnu/librt.so.1
+FROM nimmis/alpine-glibc as server
 
 # External packages
 RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 && chmod +x /bin/jq
@@ -20,4 +13,3 @@ RUN chown -R conductor /conductor
 # Flatten Image
 FROM scratch
 COPY --from=server / /
-CMD ["/bin/sh", "-c", "sleep infinity"]
