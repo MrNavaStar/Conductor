@@ -2,7 +2,7 @@ FROM busybox:stable-uclibc as busybox
 FROM gcr.io/distroless/static-debian12:debug as server
 
 # Shell
-COPY --from=busybox /bin/sh /bin/sh
+COPY --from=busybox /bin/bash /bin/bash
 # Commands for templates
 COPY --from=busybox /bin/mkdir /bin/mkdir
 COPY --from=busybox /bin/ls /bin/ls
@@ -13,9 +13,10 @@ COPY --from=busybox /bin/cp /bin/cp
 COPY --from=busybox /bin/echo /bin/echo
 COPY --from=busybox /bin/tar /bin/tar
 COPY --from=busybox /bin/wget /bin/wget
+COPY --from=busybox /bin/chmod /bin/chmod
+# Only used in build steps
 COPY --from=busybox /bin/adduser /bin/adduser
 COPY --from=busybox /bin/chown /bin/chown
-COPY --from=busybox /bin/chmod /bin/chmod
 
 # External packages
 RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64
@@ -24,7 +25,9 @@ RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-l
 RUN mkdir /conductor
 RUN adduser --no-create-home --disabled-password conductor
 RUN chown -R conductor /conductor
+RUN rm /bin/adduser /bin/chown
 
 # Flatten Image
 FROM scratch
 COPY --from=server / /
+CMD ["/bin/bash"]
