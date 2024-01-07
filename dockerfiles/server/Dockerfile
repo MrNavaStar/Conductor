@@ -1,7 +1,7 @@
 FROM alpine:latest
 RUN mkdir /conductor
 
-RUN apk --no-cache jq add ca-certificates openssl
+RUN apk --no-cache add jq ca-certificates openssl
 
 # Compat for games that use glibc (factorio)
 RUN \
