@@ -21,7 +21,7 @@ FROM busybox:stable-uclibc as server
 
 # Glibc Binaries
 #COPY --from=bin-provider /lib/x86_64-linux-gnu/ld-2.28.so  /lib/x86_64-linux-gnu/ld-2.28.so
-COPY --from=bin-provider /lib/x86_64-linux-gnu/libdl-2.28.so /lib/x86_64-linux-gnu/libdl-2.28.so
+COPY --from=bin-provider /lib/x86_64-linux-gnu /lib/x86_64-linux-gnu
 #COPY --from=bin-provider /lib/x86_64-linux-gnu/librt-2.28.so /lib/x86_64-linux-gnu/librt-2.28.so
 #COPY --from=bin-provider /lib/x86_64-linux-gnu/libresolv-2.28.so /lib/x86_64-linux-gnu/libresolv-2.28.so
 #COPY --from=bin-provider /lib/x86_64-linux-gnu/libm-2.28.so /lib/x86_64-linux-gnu/libm-2.28.so
@@ -30,7 +30,7 @@ COPY --from=bin-provider /lib/x86_64-linux-gnu/libdl-2.28.so /lib/x86_64-linux-g
 
 # Glibc symlinks
 #RUN ln -s /lib/x86_64-linux-gnu/ld-2.28.so /libx86_64-linux-gnu/ld-linux-x86-64.so.2
-RUN ln -s /lib/x86_64-linux-gnu/libdl-2.28.so /lib/x86_64-linux-gnu/libdl.so.2
+#RUN ln -s /lib/x86_64-linux-gnu/libdl-2.28.so /lib/x86_64-linux-gnu/libdl.so.2
 #RUN ln -s /lib/x86_64-linux-gnu/librt-2.28.so /lib/x86_64-linux-gnu/librt.so.1
 #RUN ln -s /lib/x86_64-linux-gnu/libresolv-2.28.so /lib/x86_64-linux-gnu/libresolv.so.2
 #RUN ln -s /lib/x86_64-linux-gnu/libm-2.28.so /lib/x86_64-linux-gnu/libm.so.6
