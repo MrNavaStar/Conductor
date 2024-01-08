@@ -37,6 +37,7 @@ COPY --from=base /opt/corretto-slim/lib/libjli.so /usr/lib/jvm/java-21-amazon-co
 COPY --from=base /opt/corretto-slim/lib/libjava.so /usr/lib/jvm/java-21-amazon-corretto/lib/libjava.so
 COPY --from=base /opt/corretto-slim/lib/server/libjvm.so /usr/lib/jvm/java-21-amazon-corretto/lib/server/libjvm.so
 COPY --from=base /opt/corretto-slim/lib/jvm.cfg /usr/lib/jvm/java-21-amazon-corretto/lib/jvm.cfg
+COPY --from=base /opt/corretto-slim/lib/classlist /usr/lib/jvm/java-21-amazon-corretto/lib/classlist
 
 RUN ln -s /usr/lib/jvm/java-21-amazon-corretto/bin/java /usr/bin/java;
 
