@@ -16,12 +16,12 @@
 #COPY --from=server / /
 #CMD ["/bin/sh", "-c", "tail", "-f", "/dev/null"]
 
-FROM gcr.io/distroless/base-debian12:latest as bin-provider
+FROM sgerrand/glibc-builder:latest as bin-provider
 FROM busybox:stable-uclibc as server
 
 # Glibc Binaries
 #COPY --from=bin-provider /lib/x86_64-linux-gnu/ld-2.28.so  /lib/x86_64-linux-gnu/ld-2.28.so
-COPY --from=bin-provider /lib/x86_64-linux-gnu /lib/x86_64-linux-gnu
+COPY --from=bin-provider /usr/glibc-compat /lib
 #COPY --from=bin-provider /lib/x86_64-linux-gnu/librt-2.28.so /lib/x86_64-linux-gnu/librt-2.28.so
 #COPY --from=bin-provider /lib/x86_64-linux-gnu/libresolv-2.28.so /lib/x86_64-linux-gnu/libresolv-2.28.so
 #COPY --from=bin-provider /lib/x86_64-linux-gnu/libm-2.28.so /lib/x86_64-linux-gnu/libm-2.28.so
