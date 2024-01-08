@@ -40,6 +40,7 @@ COPY --from=base /opt/corretto-slim/bin/java /usr/lib/jvm/java-21-amazon-corrett
 COPY --from=base /opt/corretto-slim/lib/libjli.so /usr/lib/jvm/java-21-amazon-corretto/lib/libjli.so
 COPY --from=base /opt/corretto-slim/lib/libjava.so /usr/lib/jvm/java-21-amazon-corretto/lib/libjava.so
 COPY --from=base /opt/corretto-slim/lib/libjimage.so /usr/lib/jvm/java-21-amazon-corretto/lib/libjimage.so
+COPY --from=base /opt/corretto-slim/lib/libzip.so /usr/lib/jvm/java-21-amazon-corretto/lib/libzip.so
 COPY --from=base /opt/corretto-slim/lib/jvm.cfg /usr/lib/jvm/java-21-amazon-corretto/lib/jvm.cfg
 COPY --from=base /opt/corretto-slim/lib/classlist /usr/lib/jvm/java-21-amazon-corretto/lib/classlist
 COPY --from=base /opt/corretto-slim/lib/modules /usr/lib/jvm/java-21-amazon-corretto/lib/modules
