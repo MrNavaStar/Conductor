@@ -43,6 +43,7 @@ COPY --from=base /opt/corretto-slim/bin/java /usr/lib/jvm/java-21-amazon-corrett
 #COPY --from=base /opt/corretto-slim/lib/classlist /usr/lib/jvm/java-21-amazon-corretto/lib/classlist
 
 COPY --from=base /opt/corretto-slim/lib /usr/lib/jvm/java-21-amazon-corretto/lib
+COPY --from=base /opt/corretto-slim/conf /usr/lib/jvm/java-21-amazon-corretto/conf
 
 RUN ln -s /usr/lib/jvm/java-21-amazon-corretto/bin/java /usr/bin/java;
 
