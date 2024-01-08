@@ -37,12 +37,13 @@ RUN ln -s /lib/x86_64-linux-gnu/libudev.so.1.6.13 /lib/x86_64-linux-gnu/libudev.
 COPY --from=base /opt/corretto-slim/lib/server /usr/lib/jvm/java-21-amazon-corretto/lib/server
 COPY --from=base /opt/corretto-slim/bin/java /usr/lib/jvm/java-21-amazon-corretto/bin/java
 
-#COPY --from=base /opt/corretto-slim/lib/libjli.so /usr/lib/jvm/java-21-amazon-corretto/lib/libjli.so
-#COPY --from=base /opt/corretto-slim/lib/libjava.so /usr/lib/jvm/java-21-amazon-corretto/lib/libjava.so
-#COPY --from=base /opt/corretto-slim/lib/jvm.cfg /usr/lib/jvm/java-21-amazon-corretto/lib/jvm.cfg
-#COPY --from=base /opt/corretto-slim/lib/classlist /usr/lib/jvm/java-21-amazon-corretto/lib/classlist
+COPY --from=base /opt/corretto-slim/lib/libjli.so /usr/lib/jvm/java-21-amazon-corretto/lib/libjli.so
+COPY --from=base /opt/corretto-slim/lib/libjava.so /usr/lib/jvm/java-21-amazon-corretto/lib/libjava.so
+COPY --from=base /opt/corretto-slim/lib/jvm.cfg /usr/lib/jvm/java-21-amazon-corretto/lib/jvm.cfg
+COPY --from=base /opt/corretto-slim/lib/classlist /usr/lib/jvm/java-21-amazon-corretto/lib/classlist
+COPY --from=base /opt/corretto-slim/lib/modules /usr/lib/jvm/java-21-amazon-corretto/lib/modules
 
-COPY --from=base /opt/corretto-slim/lib /usr/lib/jvm/java-21-amazon-corretto/lib
+#COPY --from=base /opt/corretto-slim/lib /usr/lib/jvm/java-21-amazon-corretto/lib
 COPY --from=base /opt/corretto-slim/conf /usr/lib/jvm/java-21-amazon-corretto/conf
 
 RUN ln -s /usr/lib/jvm/java-21-amazon-corretto/bin/java /usr/bin/java;
