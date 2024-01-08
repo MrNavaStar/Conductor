@@ -18,7 +18,7 @@
 
 FROM busybox:stable-uclibc as bin-provider
 
-ARG GLIBC_VERSION=2.35
+ARG GLIBC_VERSION=2.28
 RUN wget -O glibc.tar.gz https://github.com/sgerrand/docker-glibc-builder/releases/download/2.35-0/glibc-bin-2.35-0-x86_64.tar.gz && tar -xzf glibc.tar.gz
 
 FROM busybox:stable-uclibc as server
