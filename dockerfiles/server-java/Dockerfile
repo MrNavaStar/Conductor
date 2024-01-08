@@ -38,6 +38,8 @@ COPY --from=base /opt/corretto-slim/lib/libjava.so /usr/lib/jvm/java-21-amazon-c
 COPY --from=base /opt/corretto-slim/lib/server/libjvm.so /usr/lib/jvm/java-21-amazon-corretto/lib/server/libjvm.so
 COPY --from=base /opt/corretto-slim/lib/jvm.cfg /usr/lib/jvm/java-21-amazon-corretto/lib/jvm.cfg
 
+RUN ln -s /usr/lib/jvm/java-21-amazon-corretto/bin/java /usr/bin/java;
+
 ENV LANG C.UTF-8
 ENV JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto
 
