@@ -32,7 +32,7 @@ RUN ln -s /lib/x86_64-linux-gnu/libudev.so.1.6.13 /lib/x86_64-linux-gnu/libudev.
 #          ln -s /usr/lib/jvm/java-21-amazon-corretto/bin/$i /usr/bin/$i; \
 #       done
 
-COPY --from=base /opt/corretto-slim/java /bin/java
+COPY --from=base /opt/corretto-slim/bin/java /bin/java
 
 ENV LANG C.UTF-8
 ENV JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto
