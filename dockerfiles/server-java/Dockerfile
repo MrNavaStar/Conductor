@@ -13,9 +13,9 @@ RUN set -ux \
     && apt-get install -y java-21-amazon-corretto-jdk=1:$JAVA_VERSION binutils \
     && jlink --add-modules "$(java --list-modules | sed -e 's/@[0-9].*$/,/' | tr -d \\n)" --no-man-pages --no-header-files --strip-debug --output /opt/corretto-slim \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
-            curl gnupg software-properties-common binutils java-21-amazon-corretto-jdk=1:$JAVA_VERSION
-
-RUN rm -rf /opt/corretto-slim/legal && find /opt/corretto-slim/bin -type f ! -name java ! -name jcmd -delete
+            curl gnupg software-properties-common binutils java-21-amazon-corretto-jdk=1:$JAVA_VERSION \
+    && rm -rf /opt/corretto-slim/legal  \
+    && find /opt/corretto-slim/bin -type f ! -name java ! -name jcmd -delete
 
 FROM mrnavastar/conductor:server as server-java
 # Binaries
