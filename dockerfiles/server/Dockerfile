@@ -24,13 +24,13 @@ RUN wget -O glibc.tar.gz https://github.com/sgerrand/docker-glibc-builder/releas
 FROM busybox:stable-uclibc as server
 
 # Glibc Binaries
-COPY --from=bin-provider /usr/glibc-compat/ld-linux-x86-64.so.2 /lib/ld-linux-x86-64.so.2
-COPY --from=bin-provider /usr/glibc-compat/libdl.so.2 /lib/libdl.so.2
-COPY --from=bin-provider /usr/glibc-compat/librt.so.1 /lib/librt.so.1
-COPY --from=bin-provider /usr/glibc-compat/libresolv.so.2 /lib/libresolv.so.2
-COPY --from=bin-provider /usr/glibc-compat/libm.so.6 /lib/libm.so.6
-COPY --from=bin-provider /usr/glibc-compat/libpthread.so.0 /lib/libpthread.so.0
-COPY --from=bin-provider /usr/glibc-compat/libc.so.6 /lib/libc.so.6
+COPY --from=bin-provider /usr/glibc-compat/lib/ld-linux-x86-64.so.2 /lib/ld-linux-x86-64.so.2
+COPY --from=bin-provider /usr/glibc-compat/lib/libdl.so.2 /lib/libdl.so.2
+COPY --from=bin-provider /usr/glibc-compat/lib/librt.so.1 /lib/librt.so.1
+COPY --from=bin-provider /usr/glibc-compat/lib/libresolv.so.2 /lib/libresolv.so.2
+COPY --from=bin-provider /usr/glibc-compat/lib/libm.so.6 /lib/libm.so.6
+COPY --from=bin-provider /usr/glibc-compat/lib/libpthread.so.0 /lib/libpthread.so.0
+COPY --from=bin-provider /usr/glibc-compat/lib/libc.so.6 /lib/libc.so.6
 
 # External packages
 RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 && chmod +x /bin/jq
