@@ -15,8 +15,6 @@ RUN set -ux \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
             curl gnupg software-properties-common binutils java-21-amazon-corretto-jdk=1:$JAVA_VERSION
 
-RUN rm -rf /opt/corretto-slim/legal && find /opt/corretto-slim/bin -type f ! -name java ! -name jcmd -delete
-
 FROM mrnavastar/conductor:server as server-java
 # Binaries
 COPY --from=base /lib/x86_64-linux-gnu/libz.so.1.2.11 /lib/x86_64-linux-gnu/libz.so.1.2.11
