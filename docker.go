@@ -12,6 +12,8 @@ import (
 	urfave "github.com/urfave/cli/v2"
 	"io"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func deployContainer(templateName string, serverName string, templateVars map[string]string) error {
@@ -71,7 +73,7 @@ func deployContainer(templateName string, serverName string, templateVars map[st
 		"\ncd " + template.Info.WorkingDir +
 		"\n" + template.Actions.RootInstall
 
-	err = runCommandInContainer(createdContainer.ID, "root", rootInstallCmd)
+	_, err = runCommandInContainer(createdContainer.ID, "root", rootInstallCmd, true)
 	if err != nil {
 		return err
 	}
@@ -82,7 +84,7 @@ func deployContainer(templateName string, serverName string, templateVars map[st
 		"\n" + template.Actions.Update +
 		"\n" + saveTemplateVarsCmd(templateVars)
 
-	err = runCommandInContainer(createdContainer.ID, template.Info.User, installCmd)
+	_, err = runCommandInContainer(createdContainer.ID, template.Info.User, installCmd, true)
 	if err != nil {
 		return err
 	}
@@ -112,7 +114,51 @@ func deleteContainer(serverName string) error {
 	return nil
 }
 
-func runCommandInContainer(serverName string, user string, cmd string) error {
+func runCommandInContainer(serverName string, user string, cmd string, printOutput bool) (string, error) {
+	ctx := context.Background()
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		return "", err
+	}
+	defer cli.Close()
+
+	exec, err := cli.ContainerExecCreate(ctx, serverName, types.ExecConfig{
+		User:         user,
+		Cmd:          []string{"sh", "-c", cmd},
+		AttachStdin:  true,
+		AttachStdout: true,
+		AttachStderr: true,
+		Tty:          true,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	if printOutput {
+		resp, err := cli.ContainerExecAttach(context.Background(), exec.ID, types.ExecStartCheck{
+			Tty: true,
+		})
+		if err != nil {
+			return "", err
+		}
+		defer resp.Close()
+
+		scanner := bufio.NewScanner(resp.Reader)
+		for scanner.Scan() {
+			fmt.Println(scanner.Text())
+		}
+	} else {
+		err := cli.ContainerExecStart(context.Background(), exec.ID, types.ExecStartCheck{
+			Tty: true,
+		})
+		if err != nil {
+			return "", err
+		}
+	}
+	return exec.ID, nil
+}
+
+func attachToServerConsole(execId string) error {
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -120,29 +166,32 @@ func runCommandInContainer(serverName string, user string, cmd string) error {
 	}
 	defer cli.Close()
 
-	exec, err := cli.ContainerExecCreate(ctx, serverName, types.ExecConfig{
-		User:         user,
-		Cmd:          []string{"sh", "-c", cmd},
-		Tty:          false,
-		AttachStdout: true,
-		AttachStderr: true,
+	attachResp, err := cli.ContainerExecAttach(ctx, execId, types.ExecStartCheck{
+		Detach: false,
+		Tty:    true,
 	})
 	if err != nil {
 		return err
 	}
+	defer attachResp.Close()
 
-	resp, err := cli.ContainerExecAttach(context.Background(), exec.ID, types.ExecStartCheck{
-		Tty: true,
-	})
-	if err != nil {
-		return err
-	}
-	defer resp.Close()
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT)
 
-	scanner := bufio.NewScanner(resp.Reader)
-	for scanner.Scan() {
-		fmt.Println(scanner.Text())
-	}
+	go func() {
+		// Copy container output to the console
+		io.Copy(os.Stdout, attachResp.Reader)
+	}()
 
+	// Copy user input from the console to the container
+	go func() {
+		io.Copy(attachResp.Conn, os.Stdin)
+		cli.ContainerExecResize(ctx, execId, types.ResizeOptions{
+			Height: uint(0),
+			Width:  uint(0),
+		})
+	}()
+
+	<-sigChan // Wait for Ctrl+C signal
 	return nil
 }
