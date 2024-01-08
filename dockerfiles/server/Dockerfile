@@ -16,26 +16,21 @@
 #COPY --from=server / /
 #CMD ["/bin/sh", "-c", "tail", "-f", "/dev/null"]
 
-FROM sgerrand/glibc-builder:latest as bin-provider
+FROM busybox:stable-uclibc as bin-provider
+
+ARG GLIBC_VERSION=2.35
+RUN wget -O glibc.tar.gz https://github.com/sgerrand/docker-glibc-builder/releases/download/2.35-0/glibc-bin-2.35-0-x86_64.tar.gz && tar -xzf glibc.tar.gz
+
 FROM busybox:stable-uclibc as server
 
 # Glibc Binaries
-#COPY --from=bin-provider /lib/x86_64-linux-gnu/ld-2.28.so  /lib/x86_64-linux-gnu/ld-2.28.so
-COPY --from=bin-provider /usr/glibc-compat /lib
-#COPY --from=bin-provider /lib/x86_64-linux-gnu/librt-2.28.so /lib/x86_64-linux-gnu/librt-2.28.so
-#COPY --from=bin-provider /lib/x86_64-linux-gnu/libresolv-2.28.so /lib/x86_64-linux-gnu/libresolv-2.28.so
-#COPY --from=bin-provider /lib/x86_64-linux-gnu/libm-2.28.so /lib/x86_64-linux-gnu/libm-2.28.so
-#COPY --from=bin-provider /lib/x86_64-linux-gnu/libpthread-2.28.so /lib/x86_64-linux-gnu/libpthread-2.28.so
-#COPY --from=bin-provider /lib/x86_64-linux-gnu/libc-2.28.so  /lib/x86_64-linux-gnu/libc-2.28.so
-
-# Glibc symlinks
-#RUN ln -s /lib/x86_64-linux-gnu/ld-2.28.so /libx86_64-linux-gnu/ld-linux-x86-64.so.2
-#RUN ln -s /lib/x86_64-linux-gnu/libdl-2.28.so /lib/x86_64-linux-gnu/libdl.so.2
-#RUN ln -s /lib/x86_64-linux-gnu/librt-2.28.so /lib/x86_64-linux-gnu/librt.so.1
-#RUN ln -s /lib/x86_64-linux-gnu/libresolv-2.28.so /lib/x86_64-linux-gnu/libresolv.so.2
-#RUN ln -s /lib/x86_64-linux-gnu/libm-2.28.so /lib/x86_64-linux-gnu/libm.so.6
-#RUN ln -s /lib/x86_64-linux-gnu/libpthread-2.28.so /lib/x86_64-linux-gnu/libpthread.so.0
-#RUN ln -s /lib/x86_64-linux-gnu/libc-2.28.so  /lib/x86_64-linux-gnu/libc.so.6
+COPY --from=bin-provider /glibc/usr/glibc-compat/ld-linux-x86-64.so.2 /lib/ld-linux-x86-64.so.2
+COPY --from=bin-provider /glibc/usr/glibc-compat/libdl.so.2 /lib/libdl.so.2
+COPY --from=bin-provider /glibc/usr/glibc-compat/librt.so.1 /lib/librt.so.1
+COPY --from=bin-provider /glibc/usr/glibc-compat/libresolv.so.2 /lib/libresolv.so.2
+COPY --from=bin-provider /glibc/usr/glibc-compat/libm.so.6 /lib/libm.so.6
+COPY --from=bin-provider /glibc/usr/glibc-compat/libpthread.so.0 /lib/libpthread.so.0
+COPY --from=bin-provider /glibc/usr/glibc-compat/libc.so.6 /lib/libc.so.6
 
 # External packages
 RUN wget -O /bin/jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 && chmod +x /bin/jq
