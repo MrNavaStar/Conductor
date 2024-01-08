@@ -24,13 +24,15 @@ RUN ln -s /lib/x86_64-linux-gnu/libz.so.1.2.11 /lib/x86_64-linux-gnu/libz.so.1
 RUN ln -s /lib/x86_64-linux-gnu/libudev.so.1.6.13 /lib/x86_64-linux-gnu/libudev.so.1
 
 # Java
-RUN mkdir -p /usr/lib/jvm
-COPY --from=base /opt/corretto-slim /usr/lib/jvm/java-21-amazon-corretto
-RUN jdk_tools="java keytool rmid rmiregistry javac jaotc jlink jmod jhsdb jar jarsigner javadoc javap jcmd jconsole jdb jdeps jdeprscan jimage jinfo jmap jps jrunscript jshell jstack jstat jstatd serialver" \
-    && priority=$(echo "1${JAVA_VERSION}" | sed "s/\(\.\|-\)//g") \
-    && for i in ${jdk_tools}; do \
-          ln -s /usr/lib/jvm/java-21-amazon-corretto/bin/$i /usr/bin/$i; \
-       done
+#RUN mkdir -p /usr/lib/jvm
+#COPY --from=base /opt/corretto-slim /usr/lib/jvm/java-21-amazon-corretto
+#RUN jdk_tools="java keytool rmid rmiregistry javac jaotc jlink jmod jhsdb jar jarsigner javadoc javap jcmd jconsole jdb jdeps jdeprscan jimage jinfo jmap jps jrunscript jshell jstack jstat jstatd serialver" \
+#    && priority=$(echo "1${JAVA_VERSION}" | sed "s/\(\.\|-\)//g") \
+#    && for i in ${jdk_tools}; do \
+#          ln -s /usr/lib/jvm/java-21-amazon-corretto/bin/$i /usr/bin/$i; \
+#       done
+
+COPY --from=base /opt/corretto-slim/java /bin/java
 
 ENV LANG C.UTF-8
 ENV JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto
