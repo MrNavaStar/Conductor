@@ -35,6 +35,7 @@ RUN ln -s /lib/x86_64-linux-gnu/libudev.so.1.6.13 /lib/x86_64-linux-gnu/libudev.
 COPY --from=base /opt/corretto-slim/bin/java /bin/java
 COPY --from=base /opt/corretto-slim/lib/libjli.so /lib/libjli.so
 COPY --from=base /opt/corretto-slim/lib/libjava.so /lib/libjava.so
+COPY --from=base /opt/corretto-slim/lib/server/libjvm.so /lib/server/libjvm.so
 COPY --from=base /opt/corretto-slim/lib/jvm.cfg /lib/jvm.cfg
 
 ENV LANG C.UTF-8
