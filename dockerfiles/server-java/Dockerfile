@@ -40,4 +40,3 @@ ENV JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto
 # Flatten Image
 FROM scratch
 COPY --from=server-java / /
-CMD ["/bin/sh", "-c", "tail", "-f", "/dev/null"]

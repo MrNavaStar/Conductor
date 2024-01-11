@@ -138,7 +138,7 @@ func overrideTemplateVars(templateName string, cliArgs []string) (map[string]str
 	return templateVars, nil
 }
 
-func templateVarsToCmd(templateVars map[string]string) string {
+/*func templateVarsToCmd(templateVars map[string]string) string {
 	var cmd = ""
 	for key := range templateVars {
 		if len(templateVars[key]) == 0 {
@@ -147,9 +147,51 @@ func templateVarsToCmd(templateVars map[string]string) string {
 		cmd = key + "=\"" + templateVars[key] + "\" && " + cmd
 	}
 	return cmd
+}*/
+
+func readServerArgs(serverName string) (map[string]string, error) {
+	vars, err := properties.LoadFile(getAppDir()+"/servers/"+serverName+"/.conductor.properties", properties.UTF8)
+	if err != nil {
+		return nil, err
+	}
+	return vars.Map(), nil
 }
 
-func getInstallRootCmd(template Template, serverName string, templateVars map[string]string) string {
+func saveServerArgsCmd(templateVars map[string]string) string {
+	var cmd = "rm -f .conductor.properties && echo -e \"# This file is auto generated, DO NOT MODIFY!!!\n# Modifying incorrectly may break this server.\n"
+	for key := range templateVars {
+		cmd += key + "=${" + key + "}\n"
+	}
+	return cmd + "\" > .conductor.properties"
+}
+
+func getDockerCmd(template Template, serverName string, templateVars map[string]string) string {
+	propertiesFile := "/" + template.Info.WorkingDir + "/.conductor.properties"
+
+	var cmdVars = ""
+	for key := range templateVars {
+		cmdVars = key + "=\"" + templateVars[key] + "\" && " + cmdVars
+	}
+
+	cmd := cmdVars + "conductor_template=" + template.Info.Name + " && " + "conductor_name=" + serverName +
+		"\nif [ -f " + propertiesFile + " ]; then\nexport 'cat " + propertiesFile + "'\nfi" +
+		"\nread -p 'Mode: ' mode" +
+		"\ncase $mode in\nroot )\n" +
+		"mkdir -p " + template.Info.WorkingDir + "\ncd " + template.Info.WorkingDir + "\n" + template.Actions.RootInstall + " ;;" +
+		"\ninstall )\n" +
+		"cd " + template.Info.WorkingDir + "\n" + template.Actions.Install + "\n" + template.Actions.Update + "\n" + saveServerArgsCmd(templateVars) + " ;;" +
+		"\nupdate )\n" +
+		"cd " + template.Info.WorkingDir + "\n" + template.Actions.Update + "\n" + saveServerArgsCmd(templateVars) + " ;;" +
+		"\nstart )\n" +
+		"cd " + template.Info.WorkingDir + "\n" + template.Actions.Start + " || if [ -z \"$ntfy_url\" ]; then\nexit\nelse\ncurl -d \"🛑 Oh no! $conductor_template server $conductor_name has crashed with exit code $?!\" $ntfy_url ;;" +
+		"\nesac"
+
+	println(cmd)
+
+	return cmd
+}
+
+/*func getInstallRootCmd(template Template, serverName string, templateVars map[string]string) string {
 	templateVars["conductor_template"] = template.Info.Name
 	templateVars["conductor_name"] = serverName
 
@@ -194,20 +236,4 @@ func getStartCmd(template Template, templateVars map[string]string) string {
 	}
 
 	return cmd
-}
-
-func readServerArgs(serverName string) (map[string]string, error) {
-	vars, err := properties.LoadFile(getAppDir()+"/servers/"+serverName+"/.conductor.properties", properties.UTF8)
-	if err != nil {
-		return nil, err
-	}
-	return vars.Map(), nil
-}
-
-func saveServerArgsCmd(templateVars map[string]string) string {
-	var cmd = "rm -f .conductor.properties && echo -e \"# This file is auto generated, DO NOT MODIFY!!!\n# Modifying incorrectly may break this server.\n"
-	for key := range templateVars {
-		cmd += key + "=${" + key + "}\n"
-	}
-	return cmd + "\" > .conductor.properties"
-}
+}*/

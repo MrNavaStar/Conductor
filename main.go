@@ -97,7 +97,7 @@ func cliDeleteServer(c *urfave.Context) urfave.ExitCoder {
 }
 
 func cliStartServer(c *urfave.Context) urfave.ExitCoder {
-	serverName := c.Args().Get(0)
+	/*serverName := c.Args().Get(0)
 	if len(serverName) == 0 {
 		return nil
 	}
@@ -118,7 +118,7 @@ func cliStartServer(c *urfave.Context) urfave.ExitCoder {
 	}
 
 	println(execId)
-	/*err := c.Set("id", execId)
+	err := c.Set("id", execId)
 	if err != nil {
 		return nil
 	}*/

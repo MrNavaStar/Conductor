@@ -48,8 +48,10 @@ func deployContainer(templateName string, serverName string, templateVars map[st
 
 	createdContainer, err := cli.ContainerCreate(ctx,
 		&container.Config{
-			Image: template.Info.Container,
-			Tty:   true,
+			Image:      template.Info.Container,
+			Tty:        true,
+			Cmd:        []string{"/bin/sh", "-c"},
+			Entrypoint: []string{getDockerCmd(template, serverName, templateVars)},
 		},
 		&container.HostConfig{
 			Mounts: []mount.Mount{
@@ -68,12 +70,18 @@ func deployContainer(templateName string, serverName string, templateVars map[st
 		return err
 	}
 
-	_, err = runCommandInContainer(serverName, "root", getInstallRootCmd(template, serverName, templateVars), true)
+	return nil
+}
+
+func restartContainer(serverName string) error {
+	ctx := context.Background()
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return err
 	}
+	defer cli.Close()
 
-	_, err = runCommandInContainer(serverName, template.Info.User, getInstallCmd(template, templateVars), true)
+	err = cli.ContainerStop(ctx, "conductor-"+serverName, container.StopOptions{})
 	if err != nil {
 		return err
 	}
