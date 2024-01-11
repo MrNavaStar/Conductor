@@ -59,7 +59,7 @@ func deployContainer(templateName string, serverName string, templateVars map[st
 					Target: template.Info.WorkingDir,
 				},
 			},
-		}, nil, nil, serverName)
+		}, nil, nil, "conductor-"+serverName)
 	if err != nil {
 		return err
 	}
@@ -68,23 +68,12 @@ func deployContainer(templateName string, serverName string, templateVars map[st
 		return err
 	}
 
-	var rootInstallCmd = parseTemplateVars(templateVars) +
-		"mkdir " + template.Info.WorkingDir +
-		"\ncd " + template.Info.WorkingDir +
-		"\n" + template.Actions.RootInstall
-
-	_, err = runCommandInContainer(createdContainer.ID, "root", rootInstallCmd, true)
+	_, err = runCommandInContainer(serverName, "root", getInstallRootCmd(template, serverName, templateVars), true)
 	if err != nil {
 		return err
 	}
 
-	var installCmd = parseTemplateVars(templateVars) +
-		"\ncd " + template.Info.WorkingDir +
-		"\n" + template.Actions.Install +
-		"\n" + template.Actions.Update +
-		"\n" + saveTemplateVarsCmd(templateVars)
-
-	_, err = runCommandInContainer(createdContainer.ID, template.Info.User, installCmd, true)
+	_, err = runCommandInContainer(serverName, template.Info.User, getInstallCmd(template, templateVars), true)
 	if err != nil {
 		return err
 	}
@@ -100,7 +89,7 @@ func deleteContainer(serverName string) error {
 	}
 	defer cli.Close()
 
-	err = cli.ContainerKill(ctx, serverName, "SIGKILL")
+	err = cli.ContainerKill(ctx, "conductor-"+serverName, "SIGKILL")
 	if err != nil {
 		return err
 	}
@@ -110,7 +99,7 @@ func deleteContainer(serverName string) error {
 		return err
 	}
 
-	cli.ContainerRemove(ctx, serverName, types.ContainerRemoveOptions{RemoveVolumes: true})
+	cli.ContainerRemove(ctx, "conductor-"+serverName, types.ContainerRemoveOptions{RemoveVolumes: true})
 	return nil
 }
 
@@ -122,7 +111,7 @@ func runCommandInContainer(serverName string, user string, cmd string, printOutp
 	}
 	defer cli.Close()
 
-	exec, err := cli.ContainerExecCreate(ctx, serverName, types.ExecConfig{
+	exec, err := cli.ContainerExecCreate(ctx, "conductor-"+serverName, types.ExecConfig{
 		User:         user,
 		Cmd:          []string{"sh", "-c", cmd},
 		AttachStdin:  true,

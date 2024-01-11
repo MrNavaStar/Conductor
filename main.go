@@ -41,12 +41,12 @@ func cliGetTemplateNames() urfave.ExitCoder {
 }
 
 func cliDeployServer(c *urfave.Context) urfave.ExitCoder {
-	templateName := c.Args().Get(0)
-	if len(templateName) == 0 {
+	serverName := c.Args().Get(0)
+	if len(serverName) == 0 {
 		return nil
 	}
 
-	serverName := c.Args().Get(1)
+	templateName := c.Args().Get(1)
 	if len(templateName) == 0 {
 		return nil
 	}
@@ -97,27 +97,45 @@ func cliDeleteServer(c *urfave.Context) urfave.ExitCoder {
 }
 
 func cliStartServer(c *urfave.Context) urfave.ExitCoder {
-	/*templateName := c.Args().Get(0)
-	if len(templateName) == 0 {
+	serverName := c.Args().Get(0)
+	if len(serverName) == 0 {
 		return nil
 	}
 
-	template, err := parseTemplate(templateName)
+	serverArgs, err := readServerArgs(serverName)
 	if err != nil {
 		return urfave.Exit(err.Error(), 1)
 	}
 
-	templateVars, err := parseServerTemplateVars(c.String("name"))
+	template, err := parseTemplate(serverArgs["conductor_template"])
 	if err != nil {
 		return urfave.Exit(err.Error(), 1)
 	}
 
-	var startCmd = templateVars + "\n" + template.Actions.Start
-
-	err := runCommandInContainer()
+	execId, err := runCommandInContainer(serverName, template.Info.User, getStartCmd(template, serverArgs), false)
 	if err != nil {
 		return urfave.Exit(err.Error(), 1)
+	}
+
+	println(execId)
+	/*err := c.Set("id", execId)
+	if err != nil {
+		return nil
 	}*/
+
+	return nil
+}
+
+func cliAttachToServerConsole(c *urfave.Context) urfave.ExitCoder {
+	serverName := c.Args().Get(0)
+	if len(serverName) == 0 {
+		return nil
+	}
+
+	err := attachToServerConsole("b20f191708db51c78e0a89d3b1aefb72c721c24f9b5247219b4a85527409359e")
+	if err != nil {
+		return urfave.Exit(err.Error(), 1)
+	}
 
 	return nil
 }
@@ -158,7 +176,7 @@ func main() {
 			{
 				Name:        "deploy",
 				Description: "Deploy a new server",
-				Usage:       "conductor deploy [flags] [template name] [server name] [variable overrides]",
+				Usage:       "conductor deploy [flags] [server name] [template name] [variable overrides]",
 				Args:        true,
 				Flags: []urfave.Flag{
 					&urfave.BoolFlag{
@@ -180,31 +198,47 @@ func main() {
 					&urfave.StringFlag{
 						Name:    "yes",
 						Aliases: []string{"y"},
-						Usage:   "skip the confirmation",
+						Usage:   "Skip the confirmation",
 					},
 				},
 				Action: func(c *urfave.Context) error {
 					return cliDeleteServer(c)
 				},
 			},
-			{
+			/*{
 				Name:        "set",
 				Description: "Set a servers global variables",
 				Usage:       "conductor set [server name] [variable overrides]",
-			},
+			},*/
 			{
-				Name:    "start",
-				Aliases: []string{"begin"},
-				Usage:   "conductor start [server name]",
+				Name:        "start",
+				Aliases:     []string{"begin"},
+				Description: "Start a server with the given name",
+				Usage:       "conductor start [server name]",
+				Flags: []urfave.Flag{
+					&urfave.StringFlag{
+						Name:    "couple",
+						Aliases: []string{"c"},
+						Usage:   "Couple your current terminal to the server. Use ctrl + c to uncouple",
+					},
+				},
 				Action: func(c *urfave.Context) error {
 					return cliStartServer(c)
 				},
 			},
 			{
+				Name:        "couple",
+				Description: "Couple your current terminal to the server. Use ctrl + c to uncouple",
+				Usage:       "conductor couple [server name]",
+				Action: func(c *urfave.Context) error {
+					return cliAttachToServerConsole(c)
+				},
+			},
+			/*{
 				Name:    "stop",
 				Aliases: []string{"halt", "quit", "kill"},
 				Usage:   "conductor stop [server name]",
-			},
+			},*/
 		},
 	}
 	err := app.Run(os.Args)

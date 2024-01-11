@@ -9,6 +9,7 @@ import (
 )
 
 type TemplateInfo struct {
+	Name       string `default:""`
 	Container  string `default:"mrnavastar/conductor:server"`
 	User       string `default:"conductor"`
 	WorkingDir string `default:"/conductor" yaml:"working-dir"`
@@ -61,7 +62,7 @@ func getTemplateNames() ([]string, error) {
 	return names, nil
 }
 
-func getTemplateRaw(templateName string) ([]byte, error) {
+func getTemplateAsBytes(templateName string) ([]byte, error) {
 	templateName = parseTemplateName(templateName)
 	err := os.MkdirAll(getAppDir()+"/templates", os.ModePerm)
 	if err != nil {
@@ -79,7 +80,7 @@ func parseTemplate(templateName string) (Template, error) {
 	var template Template
 
 	templateName = parseTemplateName(templateName)
-	bytes, err := getTemplateRaw(templateName)
+	bytes, err := getTemplateAsBytes(templateName)
 	if err != nil {
 		return template, err
 	}
@@ -91,13 +92,15 @@ func parseTemplate(templateName string) (Template, error) {
 	if err := yaml.Unmarshal(bytes, &template); err != nil {
 		return template, err
 	}
+
+	template.Info.Name = templateName
 	return template, nil
 }
 
 func getTemplateVars(templateName string) (map[string]string, error) {
 	templateMap := make(map[string]interface{})
 
-	data, err := getTemplateRaw(templateName)
+	data, err := getTemplateAsBytes(templateName)
 	if err != nil {
 		return mapToStringMap(templateMap), err
 	}
@@ -128,33 +131,80 @@ func overrideTemplateVars(templateName string, cliArgs []string) (map[string]str
 		}
 
 		_, ok := templateVars[arg[0]]
-		if ok {
+		if ok || arg[0] == "ntfy_url" {
 			templateVars[arg[0]] = arg[1]
 		}
 	}
 	return templateVars, nil
 }
 
-func parseTemplateVars(templateVars map[string]string) string {
+func templateVarsToCmd(templateVars map[string]string) string {
 	var cmd = ""
 	for key := range templateVars {
 		if len(templateVars[key]) == 0 {
 			continue
 		}
-		cmd = key + "=" + templateVars[key] + " && " + cmd
+		cmd = key + "=\"" + templateVars[key] + "\" && " + cmd
 	}
 	return cmd
 }
 
-func parseServerTemplateVars(serverName string) (string, error) {
-	vars, err := properties.LoadFile(getAppDir()+"/servers/"+serverName+"/.conductor.properties", properties.UTF8)
+func getInstallRootCmd(template Template, serverName string, templateVars map[string]string) string {
+	templateVars["conductor_template"] = template.Info.Name
+	templateVars["conductor_name"] = serverName
+
+	return templateVarsToCmd(templateVars) +
+		"mkdir -p " + template.Info.WorkingDir +
+		"\ncd " + template.Info.WorkingDir +
+		"\n" + template.Actions.RootInstall
+}
+
+func getInstallCmd(template Template, templateVars map[string]string) string {
+	return templateVarsToCmd(templateVars) +
+		"\ncd " + template.Info.WorkingDir +
+		"\n" + template.Actions.Install +
+		"\n" + template.Actions.Update +
+		"\n" + saveServerArgsCmd(templateVars)
+}
+
+func getUpdateCmd(serverName string) (string, error) {
+	serverArgs, err := readServerArgs(serverName)
 	if err != nil {
 		return "", err
 	}
-	return parseTemplateVars(vars.Map()), nil
+
+	template, err := parseTemplate(serverArgs["conductor_template"])
+	if err != nil {
+		return "", err
+	}
+
+	return templateVarsToCmd(serverArgs) +
+			"\ncd " + template.Info.WorkingDir +
+			"\n" + template.Actions.Update +
+			"\n" + saveServerArgsCmd(serverArgs),
+		nil
 }
 
-func saveTemplateVarsCmd(templateVars map[string]string) string {
+func getStartCmd(template Template, templateVars map[string]string) string {
+	cmd := templateVarsToCmd(templateVars) + "cd " + template.Info.WorkingDir + " && " + template.Actions.Start + " &"
+	println(cmd)
+	_, ok := templateVars["ntfy_url"]
+	if ok {
+		cmd += " || curl -d \"🛑 Oh no! $conductor_template server $conductor_name has crashed with exit code $?!\" $ntfy_url"
+	}
+
+	return cmd
+}
+
+func readServerArgs(serverName string) (map[string]string, error) {
+	vars, err := properties.LoadFile(getAppDir()+"/servers/"+serverName+"/.conductor.properties", properties.UTF8)
+	if err != nil {
+		return nil, err
+	}
+	return vars.Map(), nil
+}
+
+func saveServerArgsCmd(templateVars map[string]string) string {
 	var cmd = "rm -f .conductor.properties && echo -e \"# This file is auto generated, DO NOT MODIFY!!!\n# Modifying incorrectly may break this server.\n"
 	for key := range templateVars {
 		cmd += key + "=${" + key + "}\n"

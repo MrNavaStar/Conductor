@@ -23,7 +23,7 @@ actions:
     rm -f fabric-installer.jar
     echo "Installed Fabric for ${minecraft_version}"
 
-  start: java -Xmx${max_memory}M &{user_jvm_args} -Dterminal.jline=false -Dterminal.ansi=true -Dlog4j2.formatMsgNoLookups=true -jar fabric-server-launch.jar nogui
+  start: java -Xmx${max_memory}M ${user_jvm_args} -Dterminal.jline=false -Dterminal.ansi=true -Dlog4j2.formatMsgNoLookups=true -jar fabric-server-launch.jar nogui
   stop: stop
   broadcast: say %s
   backup:

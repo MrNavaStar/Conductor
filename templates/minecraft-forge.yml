@@ -28,7 +28,7 @@ actions:
     rm -f forge-installer.jar start.bat start.sh
     echo "Installed Forge ${forge_version} for ${minecraft_version}"
 
-  start: java -Xmx${max_memory}M &{user_jvm_args} -Dterminal.jline=false -Dterminal.ansi=true -Dlog4j2.formatMsgNoLookups=true @libraries/net/minecraftforge/forge/${forge_version}/unix_args.txt nogui || java -Xmx${max_memory}M &{user_jvm_args} -Dlog4j2.formatMsgNoLookups=true -jar forge-${forge_version}-shim.jar
+  start: java -Xmx${max_memory}M ${user_jvm_args} -Dterminal.jline=false -Dterminal.ansi=true -Dlog4j2.formatMsgNoLookups=true @libraries/net/minecraftforge/forge/${forge_version}/unix_args.txt nogui || java -Xmx${max_memory}M ${user_jvm_args} -Dlog4j2.formatMsgNoLookups=true -jar forge-${forge_version}-shim.jar
   stop: stop
   broadcast: say %s
   backup:
