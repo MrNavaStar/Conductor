@@ -5,13 +5,9 @@ satisfactory_branch: public
 
 info:
   container: steamcmd:latest
-  user: satisfactory
 
 actions:
-  root-install: |
-    adduser -H -D satisfactory satisfactory
-    chown -R satisfactory:satisfactory .
-
+  install: adduser -H -D conductor conductor
   update: steamcmd +login anonymous +app_update 1690800 -beta ${satisfactory_branch} validate +quit
   start: ./FactoryServer.sh -Port=${port} -ServerQueryPort=${server_query_port} -BeaconPort=${beacon_port} -log -unattended
   stop: stop

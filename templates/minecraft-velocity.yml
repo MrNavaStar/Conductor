@@ -15,7 +15,6 @@ actions:
     
     build_version=$(wget -qO - https://api.papermc.io/v2/projects/velocity/versions/${velocity_version}/builds/ | jq -r '.builds[-1].build')
     wget --output-document=velocity.jar https://api.papermc.io/v2/projects/velocity/versions/${velocity_version}/builds/${build_version}/downloads/velocity-${velocity_version}-${build_version}.jar
-    echo "Installed Velocity ${velocity_version}"
 
   start: java -Xmx${max_memory}M ${user_jvm_args} -Dterminal.jline=false -Dterminal.ansi=true -Dlog4j2.formatMsgNoLookups=true -jar velocity.jar
   stop: stop
